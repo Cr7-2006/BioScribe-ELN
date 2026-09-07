@@ -1279,8 +1279,8 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                   onChange={(e) => setApprovalRole(e.target.value as any)}
                   className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
                 >
-                  <option value="peer_review">Peer Review Verification (Dr. Marcus Chen)</option>
-                  <option value="qa_compliance">Quality Assurance & Release (Sarah Jenkins, RAC)</option>
+                  <option value="peer_review">Peer Review Verification (Thameem)</option>
+                  <option value="qa_compliance">Quality Assurance & Release (Subbu)</option>
                 </select>
               </div>
 

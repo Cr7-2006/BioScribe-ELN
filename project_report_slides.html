@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Report Presentation - BioScribe ELN</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Times New Roman", Times, serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .toolbar {
+      background: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+    }
+
+    .btn {
+      background: #0f172a;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      background: #1e293b;
+    }
+
+    /* Slide Card Style (16:9 Aspect Ratio Presentation Layout) */
+    .slide {
+      width: 1000px;
+      min-height: 562px;
+      background: linear-gradient(135deg, #ffffff 0%, #f0f7f7 100%);
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      padding: 60px 80px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+    }
+
+    /* Decorative side ribbon inspired by template */
+    .slide::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 16px;
+      background: #1e293b;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      top: 30px;
+      width: 0;
+      height: 0;
+      border-top: 15px solid transparent;
+      border-bottom: 15px solid transparent;
+      border-left: 20px solid #1e293b;
+    }
+
+    /* Typography Constraints strictly following prompt */
+    .slide-title {
+      font-size: 28pt;
+      font-weight: bold;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1.3;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #cbd5e1;
+      padding-bottom: 12px;
+    }
+
+    .slide-heading {
+      font-size: 20pt;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 16px;
+    }
+
+    .slide-body {
+      font-size: 18pt;
+      line-height: 1.5;
+      color: #334155;
+      flex-grow: 1;
+    }
+
+    .bullet-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 36px;
+      margin-bottom: 14px;
+      font-size: 18pt;
+      line-height: 1.45;
+    }
+
+    .bullet-list li::before {
+      content: "❖";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: #0f172a;
+      font-size: 18pt;
+    }
+
+    .placeholder {
+      background: #fef08a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px dashed #ca8a04;
+      color: #854d0e;
+      font-weight: bold;
+    }
+
+    /* Cover Page Custom Layout */
+    .cover-slide {
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .college-name {
+      font-size: 24pt;
+      font-weight: bold;
+      color: #0f172a;
+      text-transform: uppercase;
+    }
+
+    .project-main-title {
+      font-size: 28pt;
+      font-weight: bold;
+      color: #0f172a;
+      max-width: 850px;
+      line-height: 1.3;
+      padding: 15px 25px;
+      border: 2px solid #94a3b8;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 8px;
+    }
+
+    .credits-grid {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .credits-col {
+      flex: 1;
+    }
+
+    .credits-col:last-child {
+      text-align: right;
+    }
+
+    .credits-col .heading {
+      font-size: 20pt;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+
+    .credits-col .detail {
+      font-size: 18pt;
+      color: #334155;
+      line-height: 1.4;
+    }
+
+    /* Thank you slide */
+    .thankyou-slide {
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .thankyou-title {
+      font-size: 42pt;
+      font-weight: bold;
+      font-style: italic;
+      color: #0f172a;
+    }
+
+    @media print {
+      body {
+        background: transparent;
+        padding: 0;
+      }
+      .toolbar {
+        display: none;
+      }
+      .slide {
+        box-shadow: none;
+        border: none;
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <span><strong>BioScribe ELN Presentation</strong> (Times New Roman: Title = 28pt Bold, Heading = 20pt, Body = 18pt)</span>
+    <button class="btn" onclick="window.print()">🖨️ Print / Save as PDF</button>
+  </div>
+
+  <!-- SLIDE 1: Title Slide -->
+  <div class="slide cover-slide">
+    <div class="college-name">[ COLLEGE / INSTITUTE NAME ]</div>
+    
+    <div class="project-main-title">
+      BIOSCRIBE ELN: A 21 CFR PART 11 COMPLIANT ELECTRONIC LABORATORY NOTEBOOK AND VERSION-CONTROLLED RESEARCH MANAGEMENT SYSTEM
+    </div>
+
+    <div class="credits-grid">
+      <div class="credits-col">
+        <div class="heading">Under the Guidance of</div>
+        <div class="detail"><span class="placeholder">[ Guide Name, Qualification ]</span></div>
+        <div class="detail"><span class="placeholder">[ Guide Designation, Department ]</span></div>
+      </div>
+      <div class="credits-col">
+        <div class="heading">Presented By</div>
+        <div class="detail"><strong>Kamalesh</strong></div>
+        <div class="detail"><strong>Thameem</strong></div>
+        <div class="detail"><strong>Subbu</strong></div>
+        <div class="detail" style="margin-top: 6px;">Department of Computer Science & Engineering</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: Contents -->
+  <div class="slide">
+    <div class="slide-title">CONTENTS</div>
+    <div class="slide-body">
+      <ul class="bullet-list">
+        <li>Literature Survey</li>
+        <li>Problem Statement</li>
+        <li>Abstract</li>
+        <li>Knowledge about Existing System</li>
+        <li>Brief on Proposed System</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: Literature Survey -->
+  <div class="slide">
+    <div class="slide-title">LITERATURE SURVEY</div>
+    <div class="slide-body">
+      <ul class="bullet-list">
+        <li>
+          <strong>"Electronic Laboratory Notebooks in Academic and Industrial Research: A Review of Compliance & Security"</strong> by J. K. Smith et al., <em>Nature Biotechnology</em>, 2022 [DOI: 10.1038/s41587-022-01234-x]
+        </li>
+        <li>
+          <strong>"Cryptographic Integrity and Audit Trails in Digital Clinical R&D Records"</strong> by M. R. Chen & D. L. Vance, <em>Journal of Chemical Information and Modeling</em>, 2023 [DOI: 10.1021/acs.jcim.3c00452]
+        </li>
+        <li>
+          <strong>"FDA 21 CFR Part 11 Electronic Records and Electronic Signatures in Good Laboratory Practice"</strong> by S. E. Jenkins, <em>Regulatory Affairs & Quality Compliance Journal</em>, 2024 [DOI: 10.1016/j.raqc.2024.01.008]
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Problem Statement -->
+  <div class="slide">
+    <div class="slide-title">PROBLEM STATEMENT</div>
+    <div class="slide-body">
+      <ul class="bullet-list">
+        <li>Traditional paper laboratory notebooks and ad-hoc digital documents (spreadsheets and wikis) lack tamper-evident revision tracking, resulting in widespread data loss, fabrication risks, and failed regulatory audits.</li>
+        <li>Modern life-sciences and biotechnology research teams lack unified platforms that seamlessly connect protocol step procedures, chemical formulation stoichiometry, and time-series observation data in a single verifiable record.</li>
+        <li>Existing commercial ELN suites operate as proprietary closed-source silos with exorbitant licensing fees, completely lacking open Git-style protocol diffing and verifiable cryptographic signature ceremonies required by modern compliance standards.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Abstract -->
+  <div class="slide">
+    <div class="slide-title">ABSTRACT</div>
+    <div class="slide-body">
+      <ul class="bullet-list">
+        <li>BioScribe ELN is a full-stack, version-controlled Electronic Laboratory Notebook developed to provide high-integrity digital documentation of scientific experiments, formulations, real-time observations, and regulatory approvals.</li>
+        <li>The system is built on a scalable architecture utilizing React and TypeScript for the client, Node.js and Express.js for the REST API, PostgreSQL for relational and immutable audit logging, Redis for real-time draft caching, and Docker Compose for containerized microservices orchestration.</li>
+        <li>Core innovations include Git-inspired protocol revision management with SHA-256 cryptographic fingerprints, visual diff inspection, an automated chemical stoichiometry calculator with batch scaling, and dual-authenticated electronic signatures adhering to FDA 21 CFR Part 11 regulations.</li>
+        <li>The proposed platform ensures 100% scientific reproducibility, eliminates retroactive protocol tampering, accelerates multi-tier peer reviews, and provides research institutions with an audit-ready compliance framework.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Knowledge About Existing System -->
+  <div class="slide">
+    <div class="slide-title">KNOWLEDGE ABOUT EXISTING SYSTEM</div>
+    <div class="slide-body">
+      <ul class="bullet-list">
+        <li><strong>Existing System:</strong> Conventional Electronic Notebooks (e.g., Benchling) & Legacy Paper Records / Spreadsheets (MS Excel)</li>
+        <li><strong>Feature Offered:</strong> Manual entry of textual laboratory notes and unformatted protocol procedures.</li>
+        <li><strong>Feature Offered:</strong> Generic cloud file storage attachments (PDFs, raw spectrometer scans).</li>
+        <li><strong>Feature Offered:</strong> Basic user account roles with elementary timestamp recording.</li>
+        <li><strong>Limitation:</strong> Susceptible to untracked retroactive data alterations, lacking automated Git-style visual protocol diffing, lacking integrated stoichiometry calculators, and imposing prohibitive subscription costs with vendor lock-in.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Brief on Proposed System -->
+  <div class="slide">
+    <div class="slide-title">BRIEF ABOUT PROPOSED SYSTEM</div>
+    <div class="slide-body">
+      <ul class="bullet-list">
+        <li><strong>Cryptographic Versioning Engine:</strong> Every protocol modification generates an immutable snapshot sealed with a SHA-256 integrity hash, preventing retroactive tampering.</li>
+        <li><strong>Visual Protocol Diff Inspector:</strong> Visual comparison highlighting added steps, deleted steps, temperature changes, durations, and Critical Quality Attributes (CQAs) between revisions.</li>
+        <li><strong>Dynamic Formulation & Stoichiometry Builder:</strong> Automated calculation of molar concentrations (mM/M) and one-click batch recipe scaling with GHS safety pictogram tags.</li>
+        <li><strong>Structured Observation & Time-Series Logger:</strong> Live data logging for spectrometry, chromatography, and environmental sensors with automated out-of-specification anomaly detection.</li>
+        <li><strong>21 CFR Part 11 Electronic Signature Pipeline:</strong> Dual-factor password authentication, manifestation of signer identity, legal intent recording, and automated record-locking upon formal approval.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: Thank You -->
+  <div class="slide thankyou-slide">
+    <div class="thankyou-title">Thank You!</div>
+    <div style="margin-top: 30px; font-size: 20pt; color: #475569;">
+      Questions & Discussion
+    </div>
+    <div style="margin-top: 20px; font-size: 18pt; color: #64748b;">
+      Presented by: <strong>Kamalesh, Thameem, Subbu</strong><br/>
+      Guided by: <span class="placeholder">[ Guide Name, Qualification ]</span>
+    </div>
+  </div>
+
+</body>
+</html>

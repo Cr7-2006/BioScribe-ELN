@@ -16,7 +16,18 @@ export async function login(req: Request, res: Response) {
     return res.status(400).json({ message: 'Email and password are required.' });
   }
 
-  const user = dbManager.db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = dbManager.db.users.find((u) => {
+    const uEmail = u.email.toLowerCase();
+    if (uEmail === normalizedEmail) return true;
+    if (normalizedEmail === 'kamalesh' && u.id === 'usr-elena') return true;
+    if (normalizedEmail === 'thameem' && u.id === 'usr-marcus') return true;
+    if (normalizedEmail === 'subbu' && u.id === 'usr-sarah') return true;
+    if (normalizedEmail === 'elena.vance@bioscribe.io' && u.id === 'usr-elena') return true;
+    if (normalizedEmail === 'marcus.chen@bioscribe.io' && u.id === 'usr-marcus') return true;
+    if (normalizedEmail === 'sarah.jenkins@bioscribe.io' && u.id === 'usr-sarah') return true;
+    return false;
+  });
   if (!user || !user.passwordHash) {
     return res.status(401).json({ message: 'Invalid scientific credentials.' });
   }

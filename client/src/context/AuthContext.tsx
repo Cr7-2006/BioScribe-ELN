@@ -36,11 +36,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           logout();
         }
       } else {
-        // Auto-login as Dr. Elena Vance (Lead Researcher) for immediate zero-friction demo experience
+        // Auto-login as Kamalesh (Lead Researcher) for immediate zero-friction demo experience
         try {
-          await login('elena.vance@bioscribe.io', 'Password123!');
+          await login('kamalesh@bioscribe.io', 'Password123!');
         } catch {
-          // Ignore
+          try {
+            await login('elena.vance@bioscribe.io', 'Password123!');
+          } catch {
+            // Ignore
+          }
         }
       }
       setIsLoading(false);
@@ -76,9 +80,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const switchUser = async (role: UserRole) => {
-    let email = 'elena.vance@bioscribe.io';
-    if (role === 'reviewer') email = 'marcus.chen@bioscribe.io';
-    if (role === 'qa_manager') email = 'sarah.jenkins@bioscribe.io';
+    let email = 'kamalesh@bioscribe.io';
+    if (role === 'reviewer') email = 'thameem@bioscribe.io';
+    if (role === 'qa_manager') email = 'subbu@bioscribe.io';
     if (role === 'admin') email = 'admin@bioscribe.io';
 
     await login(email, 'Password123!');
