@@ -97,44 +97,52 @@ export const Navbar: React.FC = () => {
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
-              <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  Switch Active Role (Demo)
-                </p>
-                <p className="text-[10px] text-slate-500 mt-0.5">
-                  Test review & approval sign-off ceremonies across different laboratory roles:
-                </p>
-              </div>
-              <div className="space-y-1">
-                {roles.map((r) => {
-                  const isActive = user?.role === r.role;
-                  return (
-                    <button
-                      key={r.role}
-                      onClick={() => {
-                        switchUser(r.role);
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`w-full text-left p-2 rounded-lg text-xs transition-colors flex items-start justify-between ${
-                        isActive
-                          ? 'bg-brand-500/10 border border-brand-500/30 text-white'
-                          : 'hover:bg-slate-800/60 text-slate-300'
-                      }`}
-                    >
-                      <div>
-                        <div className="font-semibold flex items-center space-x-1.5">
-                          <UserCheck className={`w-3.5 h-3.5 ${isActive ? 'text-brand-400' : 'text-slate-400'}`} />
-                          <span>{r.name}</span>
+            <>
+              {/* Invisible Click-outside Backdrop */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsDropdownOpen(false)}
+              />
+
+              <div className="absolute right-0 mt-2 w-80 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                    Switch Active Role (Demo)
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">
+                    Test review & approval sign-off ceremonies across different laboratory roles:
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  {roles.map((r) => {
+                    const isActive = user?.role === r.role;
+                    return (
+                      <button
+                        key={r.role}
+                        onClick={() => {
+                          switchUser(r.role);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full text-left p-2.5 rounded-lg text-xs transition-colors flex items-start justify-between ${
+                          isActive
+                            ? 'bg-brand-500/10 border border-brand-500/30 text-white'
+                            : 'hover:bg-slate-800/60 text-slate-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="font-semibold flex items-center space-x-1.5">
+                            <UserCheck className={`w-3.5 h-3.5 ${isActive ? 'text-brand-400' : 'text-slate-400'}`} />
+                            <span>{r.name}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5">{r.title}</div>
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">{r.title}</div>
-                      </div>
-                      {isActive && <CheckCircle className="w-4 h-4 text-brand-400 flex-shrink-0 mt-0.5" />}
-                    </button>
-                  );
-                })}
+                        {isActive && <CheckCircle className="w-4 h-4 text-brand-400 flex-shrink-0 mt-0.5" />}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>

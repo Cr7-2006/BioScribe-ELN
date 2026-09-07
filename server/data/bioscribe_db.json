@@ -71,6 +71,21 @@
   ],
   "experiments": [
     {
+      "id": "exp-3t0ih7w",
+      "projectCode": "PRJ-ONC-01",
+      "experimentNumber": "EXP-2026-0009",
+      "title": "Automated Test: Binding Kinetics of BSC-900",
+      "objective": "Measure nanomolar binding affinity via automated testing harness",
+      "hypothesis": "Apparent KD is within target threshold < 10 nM",
+      "status": "approved",
+      "currentVersionId": "ver-uy1ech5",
+      "currentVersionNumber": "1.1",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Kamalesh",
+      "createdAt": "2026-09-07T08:18:39.089Z",
+      "updatedAt": "2026-09-07T08:18:39.528Z"
+    },
+    {
       "id": "exp-0izh05z",
       "projectCode": "PRJ-ONC-01",
       "experimentNumber": "EXP-2026-0008",
@@ -194,6 +209,72 @@
     }
   ],
   "experimentVersions": [
+    {
+      "id": "ver-uy1ech5",
+      "experimentId": "exp-3t0ih7w",
+      "versionNumber": "1.1",
+      "title": "Automated Test: Binding Kinetics of BSC-900",
+      "objective": "Measure nanomolar binding affinity via automated testing harness",
+      "hypothesis": "Apparent KD is within target threshold < 10 nM",
+      "protocolSteps": [
+        {
+          "id": "step-1",
+          "stepNumber": 1,
+          "title": "Chip Sensor Equilibration",
+          "instruction": "Equilibrate with running buffer at 25°C for 20 minutes",
+          "durationMinutes": 20,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "notes": "",
+          "completed": false
+        },
+        {
+          "id": "step-2",
+          "stepNumber": 2,
+          "title": "Dissociation Monitoring",
+          "instruction": "Wash surface for 600s with buffer at 30 µL/min",
+          "durationMinutes": 10,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": false,
+          "notes": "",
+          "completed": false
+        }
+      ],
+      "conclusion": "Dissociation curve verified linear with negligible baseline drift.",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Kamalesh",
+      "changeSummary": "Added Step 2 analyte dissociation phase and flow calibration",
+      "hashSha256": "6945f7bac186c29ff5dfb6627e49668fc5cbfb75306314431584ba569e2a2993",
+      "isLocked": true,
+      "createdAt": "2026-09-07T08:18:39.104Z"
+    },
+    {
+      "id": "ver-c33b0kt",
+      "experimentId": "exp-3t0ih7w",
+      "versionNumber": "1.0",
+      "title": "Automated Test: Binding Kinetics of BSC-900",
+      "objective": "Measure nanomolar binding affinity via automated testing harness",
+      "hypothesis": "Apparent KD is within target threshold < 10 nM",
+      "protocolSteps": [
+        {
+          "id": "step-1",
+          "stepNumber": 1,
+          "title": "Chip Sensor Equilibration",
+          "instruction": "Equilibrate with running buffer at 25°C for 20 minutes",
+          "durationMinutes": 20,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "notes": "",
+          "completed": false
+        }
+      ],
+      "authorId": "usr-elena",
+      "authorName": "Dr. Kamalesh",
+      "changeSummary": "Initial creation and baseline protocol definition.",
+      "hashSha256": "e30324bdf1928b3f6e0020ac6d82da9b0fa45bb8a60d1c2a56cbf6a7a15cbc14",
+      "isLocked": true,
+      "createdAt": "2026-09-07T08:18:39.089Z"
+    },
     {
       "id": "ver-ipn9ghu",
       "experimentId": "exp-0izh05z",
@@ -906,6 +987,21 @@
       "notes": "High affinity confirmed by Langmuir 1:1 fitting.",
       "rawDataJson": {},
       "createdAt": "2026-09-07T06:14:05.306Z"
+    },
+    {
+      "id": "obs-w3qtgea",
+      "experimentId": "exp-3t0ih7w",
+      "timestamp": "2026-09-07T08:18:39.120Z",
+      "recordedById": "usr-elena",
+      "recordedByName": "Dr. Kamalesh",
+      "category": "spectroscopy",
+      "parameter": "Equilibrium Dissociation Constant (KD)",
+      "value": 4.85,
+      "unit": "nM",
+      "status": "normal",
+      "notes": "High affinity confirmed by Langmuir 1:1 fitting.",
+      "rawDataJson": {},
+      "createdAt": "2026-09-07T08:18:39.120Z"
     }
   ],
   "formulations": [
@@ -1025,6 +1121,25 @@
     }
   ],
   "approvals": [
+    {
+      "id": "appr-8i4cazm",
+      "experimentId": "exp-3t0ih7w",
+      "experimentTitle": "Automated Test: Binding Kinetics of BSC-900",
+      "experimentNumber": "EXP-2026-0009",
+      "versionId": "ver-uy1ech5",
+      "versionNumber": "1.1",
+      "requesterId": "usr-elena",
+      "requesterName": "Dr. Kamalesh",
+      "reviewerId": "usr-sarah",
+      "reviewerName": "Dr. Subbu",
+      "role": "qa_compliance",
+      "status": "approved",
+      "signatureReason": "Formal verification of GLP compliance and data integrity.",
+      "createdAt": "2026-09-07T08:18:39.152Z",
+      "signatureDigest": "1a4d165b440e13b333eba805b97412ae00dd1d44e018317b885ae1800ded43d7",
+      "comments": "Certified and released by Head of QA.",
+      "signedAt": "2026-09-07T08:18:39.528Z"
+    },
     {
       "id": "appr-veoxzbj",
       "experimentId": "exp-0izh05z",
@@ -1157,6 +1272,95 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "aud-17c322aa",
+      "timestamp": "2026-09-07T08:18:39.528Z",
+      "userId": "usr-sarah",
+      "userName": "Dr. Subbu",
+      "userRole": "qa_manager",
+      "action": "E_SIGNATURE",
+      "entityType": "approval",
+      "entityId": "appr-8i4cazm",
+      "details": "21 CFR Part 11 E-Signature executed by Dr. Subbu for EXP-2026-0009 (v1.1). Reason: \"Formal verification of GLP compliance and data integrity.\". Digest: 1a4d165b440e...",
+      "metadata": {
+        "experimentNumber": "EXP-2026-0009",
+        "versionNumber": "1.1",
+        "signatureDigest": "1a4d165b440e13b333eba805b97412ae00dd1d44e018317b885ae1800ded43d7"
+      },
+      "checksum": "c805e094e22e7f2dbd2ba667d5d68742b0b6822bfab66a421fa8e7e279232fdf"
+    },
+    {
+      "id": "aud-4032f861",
+      "timestamp": "2026-09-07T08:18:39.339Z",
+      "userId": "usr-sarah",
+      "userName": "Dr. Subbu",
+      "userRole": "qa_manager",
+      "action": "CREATE",
+      "entityType": "auth",
+      "entityId": "usr-sarah",
+      "details": "User Dr. Subbu (qa_manager) logged in to BioScribe ELN session.",
+      "checksum": "a3ce0edf869ee9738179926c26ef05858b14ae21171a92460ab1f418d8258f98"
+    },
+    {
+      "id": "aud-3c9b03f8",
+      "timestamp": "2026-09-07T08:18:39.153Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Kamalesh",
+      "userRole": "researcher",
+      "action": "UPDATE",
+      "entityType": "approval",
+      "entityId": "appr-8i4cazm",
+      "details": "Approval requested for EXP-2026-0009 (v1.1) by Dr. Kamalesh. Role: qa_compliance.",
+      "checksum": "f176813732205f79e8f46ee2e521a083ee4954d2afc90ea96a6e8a98ec74d22f"
+    },
+    {
+      "id": "aud-8b6089ee",
+      "timestamp": "2026-09-07T08:18:39.121Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Kamalesh",
+      "userRole": "researcher",
+      "action": "CREATE",
+      "entityType": "observation",
+      "entityId": "obs-w3qtgea",
+      "details": "Observation recorded for EXP-2026-0009: Equilibrium Dissociation Constant (KD) = 4.85 nM [Status: normal]",
+      "checksum": "3606668e470285bb9b537b13d76f75a20b00ef5bd1774af01f71ff4bdf6c3a9d"
+    },
+    {
+      "id": "aud-4c72d938",
+      "timestamp": "2026-09-07T08:18:39.106Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Kamalesh",
+      "userRole": "researcher",
+      "action": "VERSION_COMMIT",
+      "entityType": "experiment",
+      "entityId": "exp-3t0ih7w",
+      "details": "Committed version 1.1 for EXP-2026-0009. Summary: Added Step 2 analyte dissociation phase and flow calibration (SHA-256: 6945f7bac186...)",
+      "checksum": "70b5f1c36fdada5487a12c9071db40db3339da3d39d85aca7b9064d4c01e7e84"
+    },
+    {
+      "id": "aud-6c6d2737",
+      "timestamp": "2026-09-07T08:18:39.090Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Kamalesh",
+      "userRole": "researcher",
+      "action": "CREATE",
+      "entityType": "experiment",
+      "entityId": "exp-3t0ih7w",
+      "details": "Created experiment EXP-2026-0009: \"Automated Test: Binding Kinetics of BSC-900\" with baseline version 1.0 (SHA-256: e30324bdf1...)",
+      "checksum": "c7b5c65f3d9fe99db076392283b8eecc264b89ebc0abdff1b9449022c7bc5125"
+    },
+    {
+      "id": "aud-f1d3153f",
+      "timestamp": "2026-09-07T08:18:39.060Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Kamalesh",
+      "userRole": "researcher",
+      "action": "CREATE",
+      "entityType": "auth",
+      "entityId": "usr-elena",
+      "details": "User Dr. Kamalesh (researcher) logged in to BioScribe ELN session.",
+      "checksum": "06e0d15e6f573a055b0b10e8bd2758bcbf8740a9eb3494033e233644f6aa4264"
+    },
     {
       "id": "aud-2dc0c7b4",
       "timestamp": "2026-09-07T06:14:05.716Z",

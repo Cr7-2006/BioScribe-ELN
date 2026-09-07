@@ -14,13 +14,20 @@ import {
   X,
   Layers,
   ArrowRight,
+  Printer,
 } from 'lucide-react';
 
 interface FormulationsPageProps {
   initialFormulationId?: string;
+  isCreateModalOpen?: boolean;
+  setIsCreateModalOpen?: (open: boolean) => void;
 }
 
-export const FormulationsPage: React.FC<FormulationsPageProps> = ({ initialFormulationId }) => {
+export const FormulationsPage: React.FC<FormulationsPageProps> = ({
+  initialFormulationId,
+  isCreateModalOpen: controlledCreateModalOpen,
+  setIsCreateModalOpen: setControlledCreateModalOpen,
+}) => {
   const { success, error } = useNotification();
 
   const [formulations, setFormulations] = useState<Formulation[]>([]);
@@ -33,7 +40,14 @@ export const FormulationsPage: React.FC<FormulationsPageProps> = ({ initialFormu
   const [scaledData, setScaledData] = useState<any>(null);
 
   // New Formulation Modal State
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [internalCreateModalOpen, setInternalCreateModalOpen] = useState(false);
+  const isCreateModalOpen =
+    controlledCreateModalOpen !== undefined ? controlledCreateModalOpen : internalCreateModalOpen;
+  const setIsCreateModalOpen = setControlledCreateModalOpen || setInternalCreateModalOpen;
+
+  // Batch Preparation Sheet Modal State
+  const [isBatchSheetModalOpen, setIsBatchSheetModalOpen] = useState(false);
+
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newBatchSize, setNewBatchSize] = useState(1000);
@@ -310,7 +324,7 @@ export const FormulationsPage: React.FC<FormulationsPageProps> = ({ initialFormu
 
                 {/* Interactive Dynamic Batch Scaling Calculator Slider */}
                 <div className="pt-4 border-t border-slate-800/80 space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center space-x-2">
                       <Calculator className="w-4 h-4 text-indigo-400" />
                       <span className="text-xs font-bold text-white uppercase tracking-wider">
@@ -329,6 +343,30 @@ export const FormulationsPage: React.FC<FormulationsPageProps> = ({ initialFormu
                         {selectedFormulation.batchUnit}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Preset Multipliers */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] text-slate-400 font-medium mr-1">Scaling Presets:</span>
+                    {[0.25, 0.5, 1, 2, 5, 10].map((mult) => {
+                      const baseline = selectedFormulation.targetBatchSize || 1000;
+                      const computedSize = Math.round(baseline * mult);
+                      const isCurrent = targetScaleSize === computedSize;
+                      return (
+                        <button
+                          key={mult}
+                          type="button"
+                          onClick={() => handleScaleChange(computedSize)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition ${
+                            isCurrent
+                              ? 'bg-indigo-600 text-white shadow-sm ring-1 ring-indigo-400'
+                              : 'bg-slate-950/80 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                          }`}
+                        >
+                          {mult}x {mult === 1 ? '(Baseline)' : ''}
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Slider */}
@@ -351,14 +389,23 @@ export const FormulationsPage: React.FC<FormulationsPageProps> = ({ initialFormu
 
               {/* Ingredients & Stoichiometry Table */}
               <div className="border border-slate-800 rounded-2xl bg-slate-900/60 overflow-hidden shadow-sm space-y-3">
-                <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+                <div className="p-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center space-x-2">
                     <Scale className="w-4 h-4 text-brand-400" />
                     <span>Scaled Stoichiometry & Reagent Inventory Requirements</span>
                   </h3>
-                  <span className="text-xs font-mono text-indigo-400">
-                    {targetScaleSize} {selectedFormulation.batchUnit} Batch
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() => setIsBatchSheetModalOpen(true)}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition shadow-sm"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Cleanroom Batch Sheet</span>
+                    </button>
+                    <span className="text-xs font-mono text-indigo-400 font-bold bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
+                      {targetScaleSize} {selectedFormulation.batchUnit} Batch
+                    </span>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -638,6 +685,127 @@ export const FormulationsPage: React.FC<FormulationsPageProps> = ({ initialFormu
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Printable Cleanroom Batch Preparation Sheet Modal */}
+      {isBatchSheetModalOpen && selectedFormulation && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white text-slate-900 rounded-2xl max-w-3xl w-full p-8 space-y-6 shadow-2xl animate-in fade-in zoom-in-95 my-8">
+            <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="font-bold text-lg tracking-tight text-slate-950">BioScribe ELN</span>
+                  <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-slate-200 text-slate-800">
+                    GMP / GLP Batch Preparation Sheet
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1">Cleanroom Compounding & Recipe Execution Record</p>
+              </div>
+              <div className="flex items-center space-x-2 print:hidden">
+                <button
+                  onClick={() => window.print()}
+                  className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 flex items-center space-x-1.5 shadow"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Print Sheet / PDF</span>
+                </button>
+                <button
+                  onClick={() => setIsBatchSheetModalOpen(false)}
+                  className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Batch Metadata Header */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Formulation Code</span>
+                <span className="font-mono font-bold text-slate-900 text-sm">{selectedFormulation.code}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Target Batch Size</span>
+                <span className="font-mono font-bold text-indigo-700 text-sm">
+                  {targetScaleSize} {selectedFormulation.batchUnit}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Author / Lead</span>
+                <span className="font-semibold text-slate-900">{selectedFormulation.authorName}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 block text-[10px] uppercase font-bold">Scaling Factor</span>
+                <span className="font-mono font-semibold text-slate-900">
+                  {((targetScaleSize / (selectedFormulation.targetBatchSize || 1))).toFixed(2)}x
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-base font-bold text-slate-950">{selectedFormulation.name}</h2>
+              {selectedFormulation.description && (
+                <p className="text-xs text-slate-600 mt-1">{selectedFormulation.description}</p>
+              )}
+            </div>
+
+            {/* Reagents Table with Weigh-in Checkboxes */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                Dispensed Reagents & Tare Weight Verification
+              </h3>
+              <table className="w-full text-left text-xs border border-slate-300">
+                <thead className="bg-slate-100 text-[10px] uppercase font-bold border-b border-slate-300">
+                  <tr>
+                    <th className="p-2 w-8 text-center">✓</th>
+                    <th className="p-2">Ingredient / Reagent</th>
+                    <th className="p-2 font-mono">CAS / Lot</th>
+                    <th className="p-2 font-mono text-right">Target Weight</th>
+                    <th className="p-2 w-28">Actual Tare</th>
+                    <th className="p-2 w-24 text-center">Tech Sign</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {(scaledData?.ingredients || selectedFormulation.ingredients).map((ing: any) => (
+                    <tr key={ing.id} className="text-slate-800">
+                      <td className="p-2 text-center">
+                        <input type="checkbox" className="w-3.5 h-3.5 rounded border-slate-400" />
+                      </td>
+                      <td className="p-2 font-semibold">
+                        {ing.name}
+                        {ing.hazards && ing.hazards.length > 0 && (
+                          <div className="text-[10px] text-amber-700 font-normal">⚠️ {ing.hazards.join(', ')}</div>
+                        )}
+                      </td>
+                      <td className="p-2 font-mono text-[11px] text-slate-600">
+                        {ing.casNumber} / {ing.lotNumber}
+                      </td>
+                      <td className="p-2 font-mono font-bold text-right text-slate-950">
+                        {ing.targetQuantity} {ing.unit}
+                      </td>
+                      <td className="p-2 border-b border-dashed border-slate-400">______ {ing.unit}</td>
+                      <td className="p-2 border-b border-dashed border-slate-400 text-center">________</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Operator Attestation Signature Box */}
+            <div className="pt-4 border-t border-slate-300 grid grid-cols-2 gap-6 text-xs">
+              <div className="space-y-2">
+                <span className="block font-bold text-slate-900">Compounding Technician / Operator:</span>
+                <div className="border-b border-slate-400 pt-6"></div>
+                <span className="text-[10px] text-slate-500">Signature / Employee ID / Date</span>
+              </div>
+              <div className="space-y-2">
+                <span className="block font-bold text-slate-900">QA / Witness Verification:</span>
+                <div className="border-b border-slate-400 pt-6"></div>
+                <span className="text-[10px] text-slate-500">Signature / Date / 21 CFR Part 11 Verification</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

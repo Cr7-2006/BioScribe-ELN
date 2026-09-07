@@ -231,11 +231,13 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
   const handleSubmitForApproval = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const designatedReviewerId = approvalRole === 'qa_compliance' ? 'usr-sarah' : 'usr-marcus';
       await apiRequest('/approvals/request', {
         method: 'POST',
         body: JSON.stringify({
           experimentId,
           role: approvalRole,
+          reviewerId: designatedReviewerId,
           reason: approvalReason || 'Formal sign-off and verification for research release.',
         }),
       });

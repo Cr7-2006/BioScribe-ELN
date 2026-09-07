@@ -21,7 +21,7 @@ interface ApprovalsPageProps {
 }
 
 export const ApprovalsPage: React.FC<ApprovalsPageProps> = ({ onOpenExperiment }) => {
-  const { user } = useAuth();
+  const { user, switchUser } = useAuth();
   const { success, error } = useNotification();
 
   const [approvals, setApprovals] = useState<Approval[]>([]);
@@ -180,6 +180,15 @@ export const ApprovalsPage: React.FC<ApprovalsPageProps> = ({ onOpenExperiment }
                     <span className="text-xs uppercase font-semibold px-2.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                       Role: {appr.role.replace('_', ' ')}
                     </span>
+                    {appr.role === 'qa_compliance' ? (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-500/30">
+                        Signer: Dr. Subbu (QA)
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-950/60 text-indigo-300 border border-indigo-500/30">
+                        Signer: Dr. Thameem (PI)
+                      </span>
+                    )}
                   </div>
 
                   <span
@@ -299,6 +308,43 @@ export const ApprovalsPage: React.FC<ApprovalsPageProps> = ({ onOpenExperiment }
                 <div className="text-slate-400">Signer Role: <strong className="text-brand-400 capitalize">{user?.role.replace('_', ' ')}</strong></div>
                 <div className="text-slate-400">Department: <span className="text-slate-200">{user?.department}</span></div>
               </div>
+
+              {/* Segregation of Duties Check & Quick Switch */}
+              {selectedApproval.role === 'qa_compliance' && user?.role !== 'qa_manager' && user?.role !== 'admin' && (
+                <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-500/40 text-purple-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                    <span>
+                      <strong>Segregation of Duties:</strong> QA Compliance release requires QA credentials.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => switchUser('qa_manager')}
+                    className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] self-start sm:self-auto transition shadow whitespace-nowrap"
+                  >
+                    Switch to Dr. Subbu (QA)
+                  </button>
+                </div>
+              )}
+
+              {selectedApproval.role === 'peer_review' && user?.role !== 'reviewer' && user?.role !== 'admin' && (
+                <div className="p-3 rounded-xl bg-indigo-950/30 border border-indigo-500/40 text-indigo-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+                    <span>
+                      <strong>Peer Review:</strong> Best executed under PI Reviewer credentials.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => switchUser('reviewer')}
+                    className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] self-start sm:self-auto transition shadow whitespace-nowrap"
+                  >
+                    Switch to Dr. Thameem (PI)
+                  </button>
+                </div>
+              )}
 
               <div>
                 <label className="block text-slate-300 font-semibold mb-1">

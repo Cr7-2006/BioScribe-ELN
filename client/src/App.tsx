@@ -17,6 +17,7 @@ const AppContent: React.FC = () => {
   const [activeExperimentId, setActiveExperimentId] = useState<string | null>(null);
   const [activeFormulationId, setActiveFormulationId] = useState<string | null>(null);
   const [isNewExpModalOpen, setIsNewExpModalOpen] = useState<boolean>(false);
+  const [isNewFormModalOpen, setIsNewFormModalOpen] = useState<boolean>(false);
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ const AppContent: React.FC = () => {
   const handleNewFormulation = () => {
     setActiveFormulationId(null);
     setActiveTab('formulations');
+    setIsNewFormModalOpen(true);
   };
 
   return (
@@ -116,7 +118,11 @@ const AppContent: React.FC = () => {
           )}
 
           {activeTab === 'formulations' && (
-            <FormulationsPage initialFormulationId={activeFormulationId || undefined} />
+            <FormulationsPage
+              initialFormulationId={activeFormulationId || undefined}
+              isCreateModalOpen={isNewFormModalOpen}
+              setIsCreateModalOpen={setIsNewFormModalOpen}
+            />
           )}
 
           {activeTab === 'approvals' && (
