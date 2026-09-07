@@ -1,0 +1,826 @@
+{
+  "users": [
+    {
+      "id": "usr-elena",
+      "name": "Dr. Elena Vance",
+      "email": "elena.vance@bioscribe.io",
+      "role": "researcher",
+      "department": "Molecular Oncology & Proteomics",
+      "passwordHash": "$2a$10$wYfsEQS8KvEYj/3T8bOKyeWKLDxpBqOlE7GYz6bNsGBa4yF9JMcCW",
+      "createdAt": "2026-01-10T08:00:00.000Z"
+    },
+    {
+      "id": "usr-marcus",
+      "name": "Dr. Marcus Chen",
+      "email": "marcus.chen@bioscribe.io",
+      "role": "reviewer",
+      "department": "Bioprocess & Cell Engineering",
+      "passwordHash": "$2a$10$wYfsEQS8KvEYj/3T8bOKyeWKLDxpBqOlE7GYz6bNsGBa4yF9JMcCW",
+      "createdAt": "2026-01-10T08:00:00.000Z"
+    },
+    {
+      "id": "usr-sarah",
+      "name": "Sarah Jenkins, RAC",
+      "email": "sarah.jenkins@bioscribe.io",
+      "role": "qa_manager",
+      "department": "Quality Assurance & Regulatory Compliance",
+      "passwordHash": "$2a$10$wYfsEQS8KvEYj/3T8bOKyeWKLDxpBqOlE7GYz6bNsGBa4yF9JMcCW",
+      "createdAt": "2026-01-10T08:00:00.000Z"
+    },
+    {
+      "id": "usr-admin",
+      "name": "Lab Informatics Administrator",
+      "email": "admin@bioscribe.io",
+      "role": "admin",
+      "department": "Research Computing & Informatics",
+      "passwordHash": "$2a$10$wYfsEQS8KvEYj/3T8bOKyeWKLDxpBqOlE7GYz6bNsGBa4yF9JMcCW",
+      "createdAt": "2026-01-10T08:00:00.000Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "prj-onc-01",
+      "code": "PRJ-ONC-01",
+      "name": "Targeted Proteolysis of KRAS G12D in Pancreatic Ductal Adenocarcinoma",
+      "description": "Design and surface plasmon resonance validation of bivalent PROTAC degrader candidates targeting oncogenic KRAS mutants.",
+      "therapeuticArea": "Oncology",
+      "leadId": "usr-elena",
+      "leadName": "Dr. Elena Vance",
+      "createdAt": "2026-01-15T09:00:00.000Z"
+    },
+    {
+      "id": "prj-imm-04",
+      "code": "PRJ-IMM-04",
+      "name": "Next-Gen CAR-T Cryopreservation & Functional Recovery Profiling",
+      "description": "Optimization of DMSO-free vitrification formulations to maximize post-thaw T-cell viability and cytotoxicity.",
+      "therapeuticArea": "Cell & Gene Therapy",
+      "leadId": "usr-marcus",
+      "leadName": "Dr. Marcus Chen",
+      "createdAt": "2026-02-01T10:00:00.000Z"
+    },
+    {
+      "id": "prj-syn-09",
+      "code": "PRJ-SYN-09",
+      "name": "Continuous-Flow Enantioselective Biocatalysis for Chiral Precursors",
+      "description": "Microfluidic enzyme immobilization using engineered transaminases to produce enantiopure beta-amino acids.",
+      "therapeuticArea": "Biochemical Synthesis",
+      "leadId": "usr-elena",
+      "leadName": "Dr. Elena Vance",
+      "createdAt": "2026-02-20T11:00:00.000Z"
+    }
+  ],
+  "experiments": [
+    {
+      "id": "exp-0ehvglx",
+      "projectCode": "PRJ-ONC-01",
+      "experimentNumber": "EXP-2026-0004",
+      "title": "Automated Test: Binding Kinetics of BSC-900",
+      "objective": "Measure nanomolar binding affinity via automated testing harness",
+      "hypothesis": "Apparent KD is within target threshold < 10 nM",
+      "status": "approved",
+      "currentVersionId": "ver-v59jlcp",
+      "currentVersionNumber": "1.1",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "createdAt": "2026-09-07T05:18:26.687Z",
+      "updatedAt": "2026-09-07T05:18:26.819Z"
+    },
+    {
+      "id": "exp-kras-spr-0042",
+      "projectCode": "PRJ-ONC-01",
+      "experimentNumber": "EXP-2026-0042",
+      "title": "Dose-Response Surface Plasmon Resonance (SPR) of Small Molecule PROTAC Degrader BSC-401",
+      "objective": "Quantify kinetic binding constants (ka, kd, and KD) of BSC-401 with recombinant KRAS G12D on gold CM5 sensor surface with regeneration protocol.",
+      "hypothesis": "BSC-401 exhibits nanomolar binding affinity (KD < 15 nM) with slow dissociation kinetics compared to parental monovalent ligands.",
+      "status": "in_review",
+      "currentVersionId": "ver-kras-002",
+      "currentVersionNumber": "1.1",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "formulationId": "form-kras-504",
+      "createdAt": "2026-02-18T10:00:00.000Z",
+      "updatedAt": "2026-02-22T16:45:00.000Z"
+    },
+    {
+      "id": "exp-cart-cryo-0038",
+      "projectCode": "PRJ-IMM-04",
+      "experimentNumber": "EXP-2026-0038",
+      "title": "Validation of Cryopreservation Protocol for T-Cell Viability at -196°C Liquid Nitrogen",
+      "objective": "Establish Good Manufacturing Practice (GMP) compliant vitrification SOP achieving >90% cell viability post-cryo preservation.",
+      "hypothesis": "Reduced DMSO (5%) formulation with 50 mM trehalose preserves membrane integrity superior to standard 10% DMSO without cytotoxicity.",
+      "status": "approved",
+      "currentVersionId": "ver-cart-001",
+      "currentVersionNumber": "2.0",
+      "authorId": "usr-marcus",
+      "authorName": "Dr. Marcus Chen",
+      "formulationId": "form-cryo-101",
+      "createdAt": "2026-02-12T08:00:00.000Z",
+      "updatedAt": "2026-02-15T14:20:00.000Z"
+    },
+    {
+      "id": "exp-syn-hplc-0055",
+      "projectCode": "PRJ-SYN-09",
+      "experimentNumber": "EXP-2026-0055",
+      "title": "HPLC Enantiomeric Excess Purity Analysis of Biocatalytic Transaminase Reaction",
+      "objective": "Determine enantiomeric excess (ee%) of (R)-1-(4-trifluoromethylphenyl)ethylamine produced in enzymatic biocatalysis.",
+      "hypothesis": "Engineered enzyme variant TA-048 will catalyze asymmetric amination with >98% enantioselectivity.",
+      "status": "draft",
+      "currentVersionId": "ver-syn-001",
+      "currentVersionNumber": "0.1",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "createdAt": "2026-03-01T09:30:00.000Z",
+      "updatedAt": "2026-03-01T09:30:00.000Z"
+    }
+  ],
+  "experimentVersions": [
+    {
+      "id": "ver-v59jlcp",
+      "experimentId": "exp-0ehvglx",
+      "versionNumber": "1.1",
+      "title": "Automated Test: Binding Kinetics of BSC-900",
+      "objective": "Measure nanomolar binding affinity via automated testing harness",
+      "hypothesis": "Apparent KD is within target threshold < 10 nM",
+      "protocolSteps": [
+        {
+          "id": "step-1",
+          "stepNumber": 1,
+          "title": "Chip Sensor Equilibration",
+          "instruction": "Equilibrate with running buffer at 25°C for 20 minutes",
+          "durationMinutes": 20,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "notes": "",
+          "completed": false
+        },
+        {
+          "id": "step-2",
+          "stepNumber": 2,
+          "title": "Dissociation Monitoring",
+          "instruction": "Wash surface for 600s with buffer at 30 µL/min",
+          "durationMinutes": 10,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": false,
+          "notes": "",
+          "completed": false
+        }
+      ],
+      "conclusion": "Dissociation curve verified linear with negligible baseline drift.",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "changeSummary": "Added Step 2 analyte dissociation phase and flow calibration",
+      "hashSha256": "c2b9432ff8e0741d6b645e6fe51573f1a0263c515274c48ab544501f7283f474",
+      "isLocked": true,
+      "createdAt": "2026-09-07T05:18:26.692Z"
+    },
+    {
+      "id": "ver-vucp4zc",
+      "experimentId": "exp-0ehvglx",
+      "versionNumber": "1.0",
+      "title": "Automated Test: Binding Kinetics of BSC-900",
+      "objective": "Measure nanomolar binding affinity via automated testing harness",
+      "hypothesis": "Apparent KD is within target threshold < 10 nM",
+      "protocolSteps": [
+        {
+          "id": "step-1",
+          "stepNumber": 1,
+          "title": "Chip Sensor Equilibration",
+          "instruction": "Equilibrate with running buffer at 25°C for 20 minutes",
+          "durationMinutes": 20,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "notes": "",
+          "completed": false
+        }
+      ],
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "changeSummary": "Initial creation and baseline protocol definition.",
+      "hashSha256": "227b0f47b85adc9273c0c32f8b475eab98aa7db58e59953337fffe1015d42cc4",
+      "isLocked": true,
+      "createdAt": "2026-09-07T05:18:26.687Z"
+    },
+    {
+      "id": "ver-kras-001",
+      "experimentId": "exp-kras-spr-0042",
+      "versionNumber": "1.0",
+      "title": "Dose-Response Surface Plasmon Resonance (SPR) of Small Molecule PROTAC Degrader BSC-401",
+      "objective": "Quantify kinetic binding constants (ka, kd, and KD) of BSC-401 with recombinant KRAS G12D on gold CM5 sensor surface.",
+      "hypothesis": "BSC-401 exhibits nanomolar binding affinity (KD < 15 nM) with slow dissociation kinetics compared to parental monovalent ligands.",
+      "protocolSteps": [
+        {
+          "id": "step-1",
+          "stepNumber": 1,
+          "title": "CM5 Chip Docking & Equilibrating",
+          "instruction": "Dock certified CM5 optical sensor chip into Biacore T200. Prime system 3 times with filtered degassed MilliQ H2O at 25°C.",
+          "durationMinutes": 30,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Pressure steady at 1.4 bar, baseline stabilized within ±0.2 RU."
+        },
+        {
+          "id": "step-2",
+          "stepNumber": 2,
+          "title": "Surface Activation via EDC/NHS",
+          "instruction": "Inject 1:1 mixture of 0.4 M EDC and 0.1 M NHS for 420 seconds at flow rate 10 µL/min to activate carboxymethyl dextran matrix.",
+          "durationMinutes": 15,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Delta RU = +320 RU activation peak observed on channel 2."
+        },
+        {
+          "id": "step-3",
+          "stepNumber": 3,
+          "title": "KRAS G12D Recombinant Protein Immobilization",
+          "instruction": "Dilute His-tagged KRAS G12D (10 µg/mL in 10 mM Sodium Acetate pH 5.0). Inject for 360 seconds targeting 1200 RU density.",
+          "durationMinutes": 20,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Final immobilized level: 1245 RU."
+        },
+        {
+          "id": "step-4",
+          "stepNumber": 4,
+          "title": "PROTAC Degrader BSC-401 Multi-cycle Titration",
+          "instruction": "Inject BSC-401 in two-fold serial dilutions (0.39 nM to 50 nM) at 45 µL/min. Association: 180s, Dissociation: 600s.",
+          "durationMinutes": 120,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Rapid 1:1 Langmuir binding kinetics recorded without bulk refractive index anomalies."
+        }
+      ],
+      "conclusion": "Initial runs confirm sub-10 nM binding with acceptable mass transfer limitation bounds.",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "changeSummary": "Initial experimental design and baseline SPR protocol commitment.",
+      "hashSha256": "33dd23f5b0d39f4ef6a8f0c1d63967f904c827d9b2ecba3fd25bda27f080aa1d",
+      "isLocked": true,
+      "createdAt": "2026-02-18T10:00:00.000Z"
+    },
+    {
+      "id": "ver-kras-002",
+      "experimentId": "exp-kras-spr-0042",
+      "versionNumber": "1.1",
+      "title": "Dose-Response Surface Plasmon Resonance (SPR) of Small Molecule PROTAC Degrader BSC-401",
+      "objective": "Quantify kinetic binding constants (ka, kd, and KD) of BSC-401 with recombinant KRAS G12D on gold CM5 sensor surface with regeneration protocol.",
+      "hypothesis": "BSC-401 exhibits nanomolar binding affinity (KD < 15 nM) with slow dissociation kinetics compared to parental monovalent ligands.",
+      "protocolSteps": [
+        {
+          "id": "step-1",
+          "stepNumber": 1,
+          "title": "CM5 Chip Docking & Equilibrating",
+          "instruction": "Dock certified CM5 optical sensor chip into Biacore T200. Prime system 3 times with filtered degassed MilliQ H2O at 25°C.",
+          "durationMinutes": 30,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Pressure steady at 1.4 bar, baseline stabilized within ±0.2 RU."
+        },
+        {
+          "id": "step-2",
+          "stepNumber": 2,
+          "title": "Surface Activation via EDC/NHS",
+          "instruction": "Inject 1:1 mixture of 0.4 M EDC and 0.1 M NHS for 420 seconds at flow rate 10 µL/min to activate carboxymethyl dextran matrix.",
+          "durationMinutes": 15,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Delta RU = +320 RU activation peak observed on channel 2."
+        },
+        {
+          "id": "step-3",
+          "stepNumber": 3,
+          "title": "KRAS G12D Recombinant Protein Immobilization",
+          "instruction": "Dilute His-tagged KRAS G12D (10 µg/mL in 10 mM Sodium Acetate pH 5.0). Inject for 360 seconds targeting 1200 RU density.",
+          "durationMinutes": 20,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Final immobilized level: 1245 RU."
+        },
+        {
+          "id": "step-4",
+          "stepNumber": 4,
+          "title": "PROTAC Degrader BSC-401 Multi-cycle Titration",
+          "instruction": "Inject BSC-401 in two-fold serial dilutions (0.39 nM to 50 nM) at 45 µL/min. Association: 180s, Dissociation: 600s.",
+          "durationMinutes": 120,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Rapid 1:1 Langmuir binding kinetics recorded without bulk refractive index anomalies."
+        },
+        {
+          "id": "step-5",
+          "stepNumber": 5,
+          "title": "Regeneration with 10 mM Glycine-HCl pH 2.2",
+          "instruction": "Pulse 10 µL of glycine regeneration solution at 30 µL/min for 30 seconds between compound concentrations. Re-equilibrate in running buffer for 300s.",
+          "durationMinutes": 25,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Surface fully regenerated; baseline drift < 1.2 RU across all 8 injection cycles."
+        }
+      ],
+      "conclusion": "Regeneration protocol verified. Steady baseline maintained. Apparent KD determined to be 8.42 ± 0.35 nM.",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "changeSummary": "Added Step 5 regeneration pulse protocol and updated steady-state kinetic evaluation parameters.",
+      "hashSha256": "f6f071135d34e56814ace22d6af897aad3ec457ae8da2e5461ddd3ca0d151d6e",
+      "isLocked": false,
+      "createdAt": "2026-02-22T16:45:00.000Z"
+    },
+    {
+      "id": "ver-cart-001",
+      "experimentId": "exp-cart-cryo-0038",
+      "versionNumber": "2.0",
+      "title": "Validation of Cryopreservation Protocol for T-Cell Viability at -196°C Liquid Nitrogen",
+      "objective": "Establish Good Manufacturing Practice (GMP) compliant vitrification SOP achieving >90% cell viability post-cryo preservation.",
+      "hypothesis": "Reduced DMSO (5%) formulation with 50 mM trehalose preserves membrane integrity superior to standard 10% DMSO without cytotoxicity.",
+      "protocolSteps": [
+        {
+          "id": "step-c1",
+          "stepNumber": 1,
+          "title": "Cell Count and Viability Baseline Assessment",
+          "instruction": "Harvest expanded CD19-targeting CAR-T cells at day 12. Determine cell viability by automated acridine orange/propidium iodide (AO/PI) fluorescence.",
+          "durationMinutes": 20,
+          "temperatureCelsius": 20,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Initial viable cell density: 4.82 x 10^6 cells/mL with 97.4% initial viability."
+        },
+        {
+          "id": "step-c2",
+          "stepNumber": 2,
+          "title": "Formulation Resuspension & Controlled-Rate Freezing",
+          "instruction": "Resuspend cell pellet into chilled FORM-CRYO-101 at 1 x 10^7 cells/mL. Transfer to 2 mL cryovials. Freeze at controlled rate -1°C/min down to -80°C.",
+          "durationMinutes": 120,
+          "temperatureCelsius": -80,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Controlled cooling chamber ramp confirmed linear within ±0.15°C margin."
+        },
+        {
+          "id": "step-c3",
+          "stepNumber": 3,
+          "title": "Liquid Nitrogen Vapor Phase Storage & Thaw Analysis",
+          "instruction": "Submerge in LN2 vapor phase (-196°C) for 72 hours. Thaw in 37°C water bath for 90s, dilute with pre-warmed media, and assay post-thaw recovery.",
+          "durationMinutes": 60,
+          "temperatureCelsius": 37,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Post-thaw recovery: 94.2% viable cells after 24 hours in culture."
+        }
+      ],
+      "conclusion": "Formulation FORM-CRYO-101 demonstrated 94.2% viability, passing GLP release threshold (>85%). Protocol certified for Phase I clinical material.",
+      "authorId": "usr-marcus",
+      "authorName": "Dr. Marcus Chen",
+      "changeSummary": "Finalized and validated standard operating protocol with multi-lot replicates.",
+      "hashSha256": "ed6c7331fce6c8d7a85b3fb3b56874a993a316acf8c2a366a500d00d7b7ec900",
+      "isLocked": true,
+      "createdAt": "2026-02-14T11:00:00.000Z"
+    },
+    {
+      "id": "ver-syn-001",
+      "experimentId": "exp-syn-hplc-0055",
+      "versionNumber": "0.1",
+      "title": "HPLC Enantiomeric Excess Purity Analysis of Biocatalytic Transaminase Reaction",
+      "objective": "Determine enantiomeric excess (ee%) of (R)-1-(4-trifluoromethylphenyl)ethylamine produced in enzymatic biocatalysis.",
+      "hypothesis": "Engineered enzyme variant TA-048 will catalyze asymmetric amination with >98% enantioselectivity.",
+      "protocolSteps": [
+        {
+          "id": "step-h1",
+          "stepNumber": 1,
+          "title": "Chiral Stationary Phase Column Conditioning",
+          "instruction": "Mount Chiralpak AD-H column (250 x 4.6 mm, 5 µm). Equilibrate with 90:10 n-Hexane/Isopropanol at 1.0 mL/min for 45 min at 25°C.",
+          "durationMinutes": 45,
+          "temperatureCelsius": 25,
+          "criticalQualityAttribute": true,
+          "completed": true,
+          "notes": "Column pressure stable at 68 bar."
+        },
+        {
+          "id": "step-h2",
+          "stepNumber": 2,
+          "title": "Sample Derivatization & Autosampler Loading",
+          "instruction": "Dissolve 2.0 mg biocatalytic transaminase reaction mixture in 1.0 mL mobile phase. Filter through 0.22 µm PTFE syringe filter.",
+          "durationMinutes": 15,
+          "temperatureCelsius": 20,
+          "criticalQualityAttribute": false,
+          "completed": false,
+          "notes": "Clear colorless solution prepared in HPLC vial #14."
+        }
+      ],
+      "conclusion": "",
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "changeSummary": "Work in progress draft setup.",
+      "hashSha256": "2a4cd0b6a2ac22b89ceaa1a8e19cf90177fdb3cc83a52f932b3126bbd355c5c5",
+      "isLocked": false,
+      "createdAt": "2026-03-01T09:30:00.000Z"
+    }
+  ],
+  "observations": [
+    {
+      "id": "obs-1",
+      "experimentId": "exp-kras-spr-0042",
+      "timestamp": "2026-02-22T11:15:00.000Z",
+      "recordedById": "usr-elena",
+      "recordedByName": "Dr. Elena Vance",
+      "category": "spectroscopy",
+      "parameter": "Baseline Resonance Units (RU)",
+      "value": 1245.4,
+      "unit": "RU",
+      "status": "normal",
+      "notes": "Initial CM5 chip immobilization reference level after running buffer wash.",
+      "createdAt": "2026-02-22T11:15:00.000Z"
+    },
+    {
+      "id": "obs-2",
+      "experimentId": "exp-kras-spr-0042",
+      "timestamp": "2026-02-22T12:00:00.000Z",
+      "recordedById": "usr-elena",
+      "recordedByName": "Dr. Elena Vance",
+      "category": "measurement",
+      "parameter": "Max Sensor Response (Rmax) at 50 nM BSC-401",
+      "value": 142.8,
+      "unit": "RU",
+      "status": "normal",
+      "notes": "Binding curve achieved rapid saturation with Langmuir 1:1 stoichiometry fit.",
+      "createdAt": "2026-02-22T12:00:00.000Z"
+    },
+    {
+      "id": "obs-3",
+      "experimentId": "exp-kras-spr-0042",
+      "timestamp": "2026-02-22T13:30:00.000Z",
+      "recordedById": "usr-elena",
+      "recordedByName": "Dr. Elena Vance",
+      "category": "environmental",
+      "parameter": "Flow Cell Temperature",
+      "value": 25.04,
+      "unit": "°C",
+      "status": "normal",
+      "notes": "Peltier element maintained within tolerance (±0.05°C).",
+      "createdAt": "2026-02-22T13:30:00.000Z"
+    },
+    {
+      "id": "obs-4",
+      "experimentId": "exp-kras-spr-0042",
+      "timestamp": "2026-02-22T14:10:00.000Z",
+      "recordedById": "usr-elena",
+      "recordedByName": "Dr. Elena Vance",
+      "category": "measurement",
+      "parameter": "Calculated Equilibrium Dissociation Constant (KD)",
+      "value": 8.42,
+      "unit": "nM",
+      "status": "normal",
+      "notes": "ka = 4.12e5 (1/Ms), kd = 3.47e-3 (1/s). Chi-square = 0.42.",
+      "createdAt": "2026-02-22T14:10:00.000Z"
+    },
+    {
+      "id": "obs-5",
+      "experimentId": "exp-cart-cryo-0038",
+      "timestamp": "2026-02-14T10:15:00.000Z",
+      "recordedById": "usr-marcus",
+      "recordedByName": "Dr. Marcus Chen",
+      "category": "measurement",
+      "parameter": "Post-Thaw Cell Viability (24h AO/PI)",
+      "value": 94.2,
+      "unit": "%",
+      "status": "normal",
+      "notes": "Significantly exceeds 85% release criteria (p < 0.001 vs 10% DMSO control).",
+      "createdAt": "2026-02-14T10:15:00.000Z"
+    },
+    {
+      "id": "obs-6",
+      "experimentId": "exp-cart-cryo-0038",
+      "timestamp": "2026-02-14T10:45:00.000Z",
+      "recordedById": "usr-marcus",
+      "recordedByName": "Dr. Marcus Chen",
+      "category": "measurement",
+      "parameter": "Effector-to-Target (E:T) Cytotoxicity Lysis",
+      "value": 88.6,
+      "unit": "%",
+      "status": "normal",
+      "notes": "Nalm-6 luciferase bioluminescence assay at 5:1 ratio.",
+      "createdAt": "2026-02-14T10:45:00.000Z"
+    },
+    {
+      "id": "obs-ukzfwyu",
+      "experimentId": "exp-0ehvglx",
+      "timestamp": "2026-09-07T05:18:26.718Z",
+      "recordedById": "usr-elena",
+      "recordedByName": "Dr. Elena Vance",
+      "category": "spectroscopy",
+      "parameter": "Equilibrium Dissociation Constant (KD)",
+      "value": 4.85,
+      "unit": "nM",
+      "status": "normal",
+      "notes": "High affinity confirmed by Langmuir 1:1 fitting.",
+      "rawDataJson": {},
+      "createdAt": "2026-09-07T05:18:26.718Z"
+    }
+  ],
+  "formulations": [
+    {
+      "id": "form-kras-504",
+      "code": "FORM-KRAS-504",
+      "name": "SPR High-Affinity Sensor Running Buffer (pH 7.4)",
+      "description": "Low-autofluorescence phosphate-buffered saline supplemented with surfactant and reducing agent for kinetic analysis.",
+      "targetBatchSize": 1000,
+      "batchUnit": "mL",
+      "theoreticalYieldPercentage": 100,
+      "actualYieldPercentage": 99.4,
+      "authorId": "usr-elena",
+      "authorName": "Dr. Elena Vance",
+      "createdAt": "2026-02-05T14:30:00.000Z",
+      "updatedAt": "2026-02-05T14:30:00.000Z",
+      "ingredients": [
+        {
+          "id": "ing-1",
+          "formulationId": "form-kras-504",
+          "name": "Tris(hydroxymethyl)aminomethane (Tris Base)",
+          "casNumber": "77-86-1",
+          "lotNumber": "TRIS-2026-09A",
+          "molecularWeight": 121.14,
+          "purityPercentage": 99.8,
+          "targetQuantity": 6.057,
+          "unit": "g",
+          "role": "buffer",
+          "hazards": [
+            "GHS07 Eye/Skin Irritant"
+          ]
+        },
+        {
+          "id": "ing-2",
+          "formulationId": "form-kras-504",
+          "name": "Sodium Chloride (NaCl)",
+          "casNumber": "7647-14-5",
+          "lotNumber": "NACL-884-X",
+          "molecularWeight": 58.44,
+          "purityPercentage": 99.9,
+          "targetQuantity": 8.766,
+          "unit": "g",
+          "role": "excipient",
+          "hazards": []
+        },
+        {
+          "id": "ing-3",
+          "formulationId": "form-kras-504",
+          "name": "Tris(2-carboxyethyl)phosphine (TCEP-HCl)",
+          "casNumber": "51805-45-9",
+          "lotNumber": "TCP-2025-41C",
+          "molecularWeight": 286.65,
+          "purityPercentage": 98.5,
+          "targetQuantity": 0.287,
+          "unit": "g",
+          "role": "active_moiety",
+          "hazards": [
+            "GHS05 Corrosive"
+          ]
+        },
+        {
+          "id": "ing-4",
+          "formulationId": "form-kras-504",
+          "name": "Polysorbate 20 (Tween-20)",
+          "casNumber": "9005-64-5",
+          "lotNumber": "TW20-992B",
+          "molecularWeight": 1227.5,
+          "purityPercentage": 100,
+          "targetQuantity": 0.5,
+          "unit": "mL",
+          "role": "solvent",
+          "hazards": []
+        }
+      ]
+    },
+    {
+      "id": "form-cryo-101",
+      "code": "FORM-CRYO-101",
+      "name": "Vitrification Preservation Matrix (DMSO-Reduced 5%)",
+      "description": "Sterile cryopreservation formulation using trehalose disaccharide and human serum albumin for cellular preservation.",
+      "targetBatchSize": 500,
+      "batchUnit": "mL",
+      "theoreticalYieldPercentage": 100,
+      "actualYieldPercentage": 98.8,
+      "authorId": "usr-marcus",
+      "authorName": "Dr. Marcus Chen",
+      "createdAt": "2026-02-12T09:15:00.000Z",
+      "updatedAt": "2026-02-12T09:15:00.000Z",
+      "ingredients": [
+        {
+          "id": "ing-5",
+          "formulationId": "form-cryo-101",
+          "name": "D-(+)-Trehalose Dihydrate",
+          "casNumber": "6138-23-4",
+          "lotNumber": "TRE-2025-014",
+          "molecularWeight": 378.33,
+          "purityPercentage": 99,
+          "targetQuantity": 18.91,
+          "unit": "g",
+          "role": "active_moiety",
+          "hazards": []
+        },
+        {
+          "id": "ing-6",
+          "formulationId": "form-cryo-101",
+          "name": "Human Serum Albumin 20% solution",
+          "casNumber": "70024-90-7",
+          "lotNumber": "HSA-CLIN-002",
+          "molecularWeight": 66500,
+          "purityPercentage": 96,
+          "targetQuantity": 50,
+          "unit": "mL",
+          "role": "excipient",
+          "hazards": []
+        }
+      ]
+    }
+  ],
+  "approvals": [
+    {
+      "id": "appr-4xm66l9",
+      "experimentId": "exp-0ehvglx",
+      "experimentTitle": "Automated Test: Binding Kinetics of BSC-900",
+      "experimentNumber": "EXP-2026-0004",
+      "versionId": "ver-v59jlcp",
+      "versionNumber": "1.1",
+      "requesterId": "usr-elena",
+      "requesterName": "Dr. Elena Vance",
+      "reviewerId": "usr-elena",
+      "reviewerName": "Dr. Elena Vance",
+      "role": "qa_compliance",
+      "status": "approved",
+      "signatureReason": "Formal verification of GLP compliance and data integrity.",
+      "createdAt": "2026-09-07T05:18:26.734Z",
+      "signatureDigest": "3f4f4b51b83f5141b13b11c51b945d4e93f15d14be372be28cde1778d5f60a0c",
+      "comments": "Certified by automated verification suite.",
+      "signedAt": "2026-09-07T05:18:26.819Z"
+    },
+    {
+      "id": "appr-001",
+      "experimentId": "exp-kras-spr-0042",
+      "experimentTitle": "Dose-Response Surface Plasmon Resonance (SPR) of Small Molecule PROTAC Degrader BSC-401",
+      "experimentNumber": "EXP-2026-0042",
+      "versionId": "ver-kras-002",
+      "versionNumber": "1.1",
+      "requesterId": "usr-elena",
+      "requesterName": "Dr. Elena Vance",
+      "reviewerId": "usr-marcus",
+      "reviewerName": "Dr. Marcus Chen",
+      "role": "peer_review",
+      "status": "pending",
+      "signatureReason": "Peer review verification of SPR kinetic fitting and regeneration protocol.",
+      "createdAt": "2026-02-22T17:00:00.000Z"
+    },
+    {
+      "id": "appr-002",
+      "experimentId": "exp-cart-cryo-0038",
+      "experimentTitle": "Validation of Cryopreservation Protocol for T-Cell Viability at -196°C Liquid Nitrogen",
+      "experimentNumber": "EXP-2026-0038",
+      "versionId": "ver-cart-001",
+      "versionNumber": "2.0",
+      "requesterId": "usr-marcus",
+      "requesterName": "Dr. Marcus Chen",
+      "reviewerId": "usr-sarah",
+      "reviewerName": "Sarah Jenkins, RAC",
+      "role": "qa_compliance",
+      "status": "approved",
+      "signatureReason": "I approve this laboratory notebook record and confirm data integrity pursuant to 21 CFR Part 11 regulations.",
+      "signatureDigest": "36802aa8b64d746a9ae52f0f807427767ef5575b1a0f09e716632fc378991007",
+      "comments": "Full compliance verified. All raw data audit logs reconciled. Batch FORM-CRYO-101 released for clinical phase.",
+      "signedAt": "2026-02-15T14:20:00.000Z",
+      "createdAt": "2026-02-14T15:00:00.000Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "aud-606e5b30",
+      "timestamp": "2026-09-07T05:18:26.820Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "E_SIGNATURE",
+      "entityType": "approval",
+      "entityId": "appr-4xm66l9",
+      "details": "21 CFR Part 11 E-Signature executed by Dr. Elena Vance for EXP-2026-0004 (v1.1). Reason: \"Formal verification of GLP compliance and data integrity.\". Digest: 3f4f4b51b83f...",
+      "metadata": {
+        "experimentNumber": "EXP-2026-0004",
+        "versionNumber": "1.1",
+        "signatureDigest": "3f4f4b51b83f5141b13b11c51b945d4e93f15d14be372be28cde1778d5f60a0c"
+      },
+      "checksum": "72911a5aff7b55308a26faa0418d8d2cf3f9ead4c9f3d79f8b7adc6a7fd7dd23"
+    },
+    {
+      "id": "aud-970ab0dc",
+      "timestamp": "2026-09-07T05:18:26.734Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "UPDATE",
+      "entityType": "approval",
+      "entityId": "appr-4xm66l9",
+      "details": "Approval requested for EXP-2026-0004 (v1.1) by Dr. Elena Vance. Role: qa_compliance.",
+      "checksum": "a567e105f76c01d0b1058f3d46cabd95aa7ecd435c2bd23dad6ee846a6510de4"
+    },
+    {
+      "id": "aud-09f7a104",
+      "timestamp": "2026-09-07T05:18:26.719Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "CREATE",
+      "entityType": "observation",
+      "entityId": "obs-ukzfwyu",
+      "details": "Observation recorded for EXP-2026-0004: Equilibrium Dissociation Constant (KD) = 4.85 nM [Status: normal]",
+      "checksum": "3445bfcfb073507d6d69473f2e9157124de3f4204af0fbf9a46b150aaeb29c9d"
+    },
+    {
+      "id": "aud-a4b5d066",
+      "timestamp": "2026-09-07T05:18:26.693Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "VERSION_COMMIT",
+      "entityType": "experiment",
+      "entityId": "exp-0ehvglx",
+      "details": "Committed version 1.1 for EXP-2026-0004. Summary: Added Step 2 analyte dissociation phase and flow calibration (SHA-256: c2b9432ff8e0...)",
+      "checksum": "43a3215f2bbd568609cf8b03ddc0134aae251e36dbc4608e67de9cb5af6cb85f"
+    },
+    {
+      "id": "aud-ee31f463",
+      "timestamp": "2026-09-07T05:18:26.687Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "CREATE",
+      "entityType": "experiment",
+      "entityId": "exp-0ehvglx",
+      "details": "Created experiment EXP-2026-0004: \"Automated Test: Binding Kinetics of BSC-900\" with baseline version 1.0 (SHA-256: 227b0f47b8...)",
+      "checksum": "c585671335f14853f0a6a5866be01f78bfa1fc8f4cea073fa6bb0fa5f106ba31"
+    },
+    {
+      "id": "aud-45eec364",
+      "timestamp": "2026-09-07T05:18:26.669Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "CREATE",
+      "entityType": "auth",
+      "entityId": "usr-elena",
+      "details": "User Dr. Elena Vance (researcher) logged in to BioScribe ELN session.",
+      "checksum": "a7e97342dc17a3e786fdbf54ef98178db970fbc79eb61f4d576bc6393fd5eb90"
+    },
+    {
+      "id": "aud-16ae6c88",
+      "timestamp": "2026-09-07T05:13:20.382Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "CREATE",
+      "entityType": "auth",
+      "entityId": "usr-elena",
+      "details": "User Dr. Elena Vance (researcher) logged in to BioScribe ELN session.",
+      "checksum": "5b88a1a028f5f2c5f18536a41f79972d1a7b0a177ce4f891ca40a883b9f77f3d"
+    },
+    {
+      "id": "aud-001",
+      "timestamp": "2026-02-14T11:00:00.000Z",
+      "userId": "usr-marcus",
+      "userName": "Dr. Marcus Chen",
+      "userRole": "reviewer",
+      "action": "VERSION_COMMIT",
+      "entityType": "experiment",
+      "entityId": "exp-cart-cryo-0038",
+      "details": "Committed Version 2.0 of EXP-2026-0038 with SHA-256 hash ed6c7331fce6...",
+      "checksum": "e7cb41eed34b35e80ca7c2b46c04ebc6d210cd50ad04d89d70f4a25af19fca0f"
+    },
+    {
+      "id": "aud-002",
+      "timestamp": "2026-02-15T14:20:00.000Z",
+      "userId": "usr-sarah",
+      "userName": "Sarah Jenkins, RAC",
+      "userRole": "qa_manager",
+      "action": "E_SIGNATURE",
+      "entityType": "approval",
+      "entityId": "appr-002",
+      "details": "21 CFR Part 11 Electronic Signature executed with reason: Quality Assurance Release. Digest: 36802aa8b64d...",
+      "checksum": "abc6b01869daaef7715e06e32566d3a1181d541aaf52bf3a85cf09b9c2aa6eb8"
+    },
+    {
+      "id": "aud-003",
+      "timestamp": "2026-02-22T17:00:00.000Z",
+      "userId": "usr-elena",
+      "userName": "Dr. Elena Vance",
+      "userRole": "researcher",
+      "action": "UPDATE",
+      "entityType": "approval",
+      "entityId": "appr-001",
+      "details": "Submitted experiment EXP-2026-0042 (v1.1) to Dr. Marcus Chen for peer review sign-off.",
+      "checksum": "8cbc3dd2df488e530b492cb18edc485c269eb3ebc2c721b27e72b2043f0ff3fa"
+    }
+  ]
+}
