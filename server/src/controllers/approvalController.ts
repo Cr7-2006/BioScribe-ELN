@@ -120,6 +120,21 @@ export async function signApproval(req: AuthRequest, res: Response) {
     return res.status(401).json({ message: 'Invalid signature authentication password. Signing ceremony aborted.' });
   }
 
+  // 21 CFR Part 11 & GLP Segregation of Duties:
+  // QA Compliance release must be executed by QA Manager or Admin
+  if (approval.role === 'qa_compliance' && user.role !== 'qa_manager' && user.role !== 'admin') {
+    return res.status(403).json({
+      message: '21 CFR Part 11 Compliance Violation: QA Compliance signatures require QA Manager or Admin credentials.',
+    });
+  }
+
+  // Designated reviewer check
+  if (approval.reviewerId && approval.reviewerId !== user.id && user.role !== 'admin') {
+    return res.status(403).json({
+      message: 'Unauthorized. This approval was specifically designated to another reviewer.',
+    });
+  }
+
   const experiment = dbManager.db.experiments.find((e) => e.id === approval.experimentId);
   const version = dbManager.db.experimentVersions.find((v) => v.id === approval.versionId);
 

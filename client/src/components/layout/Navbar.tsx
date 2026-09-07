@@ -17,19 +17,19 @@ export const Navbar: React.FC = () => {
   const roles: { role: UserRole; name: string; title: string; color: string }[] = [
     {
       role: 'researcher',
-      name: 'Kamalesh',
+      name: 'Dr. Kamalesh',
       title: 'Lead Researcher (Author)',
       color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
     },
     {
       role: 'reviewer',
-      name: 'Thameem',
+      name: 'Dr. Thameem',
       title: 'Principal Investigator (Reviewer)',
       color: 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10',
     },
     {
       role: 'qa_manager',
-      name: 'Subbu',
+      name: 'Dr. Subbu',
       title: 'Head of QA / Compliance (Signer)',
       color: 'text-purple-400 border-purple-500/30 bg-purple-500/10',
     },

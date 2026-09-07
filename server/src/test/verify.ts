@@ -35,7 +35,7 @@ async function runTests() {
     const loginRes = await fetch(`${baseUrl}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'elena.vance@bioscribe.io', password: 'Password123!' }),
+      body: JSON.stringify({ email: 'kamalesh@bioscribe.io', password: 'Password123!' }),
     });
     const loginData = await loginRes.json();
     if (!loginRes.ok || !loginData.token) throw new Error('Auth failed: ' + JSON.stringify(loginData));
@@ -173,49 +173,132 @@ async function runTests() {
     if (!scaleRes.ok) throw new Error('Batch scale calculation failed');
     console.log(`   ✅ Scaling verified: Scaled to ${scaleData.scaledBatchSize} mL. Scaled quantity: ${scaleData.ingredients[0].targetQuantity} g (Molarity: ${scaleData.ingredients[0].calculatedConcentration})`);
 
-    // 8. 21 CFR Part 11 Electronic Signature Ceremony Test
-    console.log('8️⃣  Testing 21 CFR Part 11 Approval & Electronic Signature Ceremony...');
+    // 8. Formulation Input Validation Edge Cases
+    console.log('8️⃣  Testing Formulation Input Validation (Negative Batch Size Rejection)...');
+    const invalidScaleRes = await fetch(`${baseUrl}/formulations/calculate`, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({
+        currentBatchSize: 1000,
+        newBatchSize: -500,
+        batchUnit: 'mL',
+        ingredients: [],
+      }),
+    });
+    if (invalidScaleRes.status !== 400) {
+      throw new Error(`Expected status 400 for negative batch size, got ${invalidScaleRes.status}`);
+    }
+    console.log('   ✅ Input validation confirmed: Negative batch size correctly rejected with HTTP 400.');
+
+    // 9. Request QA Release Approval Routed to Dr. Subbu
+    console.log('9️⃣  Testing QA Release Approval Routing to Dr. Subbu...');
     const reqApprovalRes = await fetch(`${baseUrl}/approvals/request`, {
       method: 'POST',
       headers: authHeaders,
       body: JSON.stringify({
         experimentId: testExpId,
+        reviewerId: 'usr-sarah', // Dr. Subbu
         role: 'qa_compliance',
-        reason: 'Automated release testing sign-off',
+        reason: 'Automated release testing sign-off for QA release.',
       }),
     });
     const approvalReqData = await reqApprovalRes.json();
+    if (!reqApprovalRes.ok) throw new Error('Request approval failed: ' + JSON.stringify(approvalReqData));
     const approvalId = approvalReqData.approval.id;
+    console.log(`   ✅ Approval request routed: ID ${approvalId} [Role: ${approvalReqData.approval.role}]`);
 
-    // Execute signature ceremony with password verification
-    const signRes = await fetch(`${baseUrl}/approvals/${approvalId}/sign`, {
+    // 10. RBAC Segregation of Duties Enforcement (Dr. Kamalesh cannot sign QA release)
+    console.log('🔟 Testing RBAC Segregation of Duties (Researcher cannot sign QA release)...');
+    const unauthorizedSignRes = await fetch(`${baseUrl}/approvals/${approvalId}/sign`, {
       method: 'POST',
-      headers: authHeaders,
+      headers: authHeaders, // Dr. Kamalesh (researcher)
+      body: JSON.stringify({
+        password: 'Password123!',
+        decision: 'approve',
+        signatureReason: 'Researcher attempting to sign QA release without QA credentials.',
+      }),
+    });
+    if (unauthorizedSignRes.status !== 403) {
+      throw new Error(`Expected HTTP 403 Forbidden for unauthorized QA sign-off, got ${unauthorizedSignRes.status}`);
+    }
+    console.log('   ✅ RBAC segregation enforced: Researcher attempt to execute QA release rejected with HTTP 403.');
+
+    // 11. 21 CFR Part 11 Electronic Signature Invalid Password Challenge
+    console.log('1️⃣1️⃣ Testing 21 CFR Part 11 Electronic Signature Password Challenge...');
+    const qaLoginRes = await fetch(`${baseUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'subbu@bioscribe.io', password: 'Password123!' }),
+    });
+    const qaLoginData = await qaLoginRes.json();
+    if (!qaLoginRes.ok || !qaLoginData.token) throw new Error('QA login failed: ' + JSON.stringify(qaLoginData));
+    const qaAuthHeaders = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${qaLoginData.token}`,
+    };
+
+    const badPasswordSignRes = await fetch(`${baseUrl}/approvals/${approvalId}/sign`, {
+      method: 'POST',
+      headers: qaAuthHeaders,
+      body: JSON.stringify({
+        password: 'WrongPassword!',
+        decision: 'approve',
+        signatureReason: 'Formal verification of GLP compliance.',
+      }),
+    });
+    if (badPasswordSignRes.status !== 401) {
+      throw new Error(`Expected HTTP 401 for incorrect signature password, got ${badPasswordSignRes.status}`);
+    }
+    console.log('   ✅ 21 CFR Part 11 Challenge verified: Incorrect signature password strictly rejected with HTTP 401.');
+
+    // 12. 21 CFR Part 11 Legitimate Electronic Signature Execution
+    console.log('1️⃣2️⃣ Testing Legitimate 21 CFR Part 11 Electronic Signature Ceremony...');
+    const validSignRes = await fetch(`${baseUrl}/approvals/${approvalId}/sign`, {
+      method: 'POST',
+      headers: qaAuthHeaders,
       body: JSON.stringify({
         password: 'Password123!',
         decision: 'approve',
         signatureReason: 'Formal verification of GLP compliance and data integrity.',
-        comments: 'Certified by automated verification suite.',
+        comments: 'Certified and released by Head of QA.',
       }),
     });
-    const signData = await signRes.json();
-    if (!signRes.ok || !signData.approval.signatureDigest) {
-      throw new Error('Electronic signature failed: ' + JSON.stringify(signData));
+    const validSignData = await validSignRes.json();
+    if (!validSignRes.ok || !validSignData.approval.signatureDigest) {
+      throw new Error('Electronic signature failed: ' + JSON.stringify(validSignData));
     }
-    console.log(`   ✅ 21 CFR Part 11 E-Signature Ceremony Passed!`);
-    console.log(`   ✅ Signer: ${signData.approval.reviewerName} | Digest: ${signData.approval.signatureDigest}`);
-    console.log(`   ✅ Record Locked: Experiment status is now "${signData.experiment.status}"`);
+    console.log('   ✅ 21 CFR Part 11 Ceremony Successful!');
+    console.log(`   ✅ Signer: ${validSignData.approval.reviewerName} | Digest: ${validSignData.approval.signatureDigest}`);
+    console.log(`   ✅ Record State: Experiment status updated to "${validSignData.experiment.status}"`);
 
-    // 9. Tamper-Evident Audit Trail Integrity Test
-    console.log('9️⃣  Testing Immutable Regulatory Audit Trail...');
+    // 13. Immutable Record Locking Verification
+    console.log('1️⃣3️⃣ Testing Immutable Record Locking (Modifying locked experiment rejected)...');
+    const mutateLockedRes = await fetch(`${baseUrl}/experiments/${testExpId}/versions`, {
+      method: 'POST',
+      headers: authHeaders,
+      body: JSON.stringify({
+        bumpType: 'minor',
+        changeSummary: 'Attempting illegal modification to an approved record.',
+        protocolSteps: [],
+      }),
+    });
+    if (mutateLockedRes.status !== 400) {
+      throw new Error(`Expected HTTP 400 for modifying approved experiment, got ${mutateLockedRes.status}`);
+    }
+    console.log('   ✅ Immutable Lock confirmed: Post-approval revision rejected with HTTP 400.');
+
+    // 14. Tamper-Evident Regulatory Audit Trail Integrity Test
+    console.log('1️⃣4️⃣ Testing Immutable Regulatory Audit Trail SHA-256 Checksums...');
     const auditRes = await fetch(`${baseUrl}/audit-trail`, { headers: authHeaders });
     const auditData = await auditRes.json();
     if (!auditRes.ok || !auditData.allIntegrityValid) {
-      throw new Error('Audit trail integrity check failed!');
+      throw new Error('Audit trail integrity check failed! Total logs: ' + auditData.totalCount);
     }
-    console.log(`   ✅ Audit trail verified: ${auditData.totalCount} events logged with 100% valid SHA-256 checksums!`);
+    console.log(`   ✅ Audit trail verified: All ${auditData.totalCount} events verified with 100% valid SHA-256 checksums!`);
 
-    console.log('\n🎉 ALL 9 SYSTEM VERIFICATION TESTS PASSED SUCCESSFULLY! 🎉\n');
+    console.log('\n===============================================================');
+    console.log('🎉 ALL 14 FULL-SPECTRUM QA VERIFICATION TESTS PASSED (100%)! 🎉');
+    console.log('===============================================================\n');
   } finally {
     server.close();
   }

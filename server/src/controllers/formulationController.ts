@@ -112,8 +112,14 @@ export async function calculateBatchScale(req: AuthRequest, res: Response) {
     return res.status(400).json({ message: 'Missing required parameters for batch scaling.' });
   }
 
-  const scaledIngredients = scaleFormulation(ingredients, Number(currentBatchSize), Number(newBatchSize));
-  const enriched = calculateStoichiometry(scaledIngredients, Number(newBatchSize), batchUnit);
+  const curSize = Number(currentBatchSize);
+  const newSize = Number(newBatchSize);
+  if (isNaN(curSize) || curSize <= 0 || isNaN(newSize) || newSize <= 0) {
+    return res.status(400).json({ message: 'Batch sizes must be valid positive numbers.' });
+  }
+
+  const scaledIngredients = scaleFormulation(ingredients, curSize, newSize);
+  const enriched = calculateStoichiometry(scaledIngredients, newSize, batchUnit);
 
   return res.json({
     scaledBatchSize: Number(newBatchSize),

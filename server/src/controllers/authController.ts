@@ -20,9 +20,9 @@ export async function login(req: Request, res: Response) {
   const user = dbManager.db.users.find((u) => {
     const uEmail = u.email.toLowerCase();
     if (uEmail === normalizedEmail) return true;
-    if (normalizedEmail === 'kamalesh' && u.id === 'usr-elena') return true;
-    if (normalizedEmail === 'thameem' && u.id === 'usr-marcus') return true;
-    if (normalizedEmail === 'subbu' && u.id === 'usr-sarah') return true;
+    if ((normalizedEmail === 'kamalesh' || normalizedEmail === 'dr. kamalesh' || normalizedEmail === 'dr kamalesh') && u.id === 'usr-elena') return true;
+    if ((normalizedEmail === 'thameem' || normalizedEmail === 'dr. thameem' || normalizedEmail === 'dr thameem') && u.id === 'usr-marcus') return true;
+    if ((normalizedEmail === 'subbu' || normalizedEmail === 'dr. subbu' || normalizedEmail === 'dr subbu') && u.id === 'usr-sarah') return true;
     if (normalizedEmail === 'elena.vance@bioscribe.io' && u.id === 'usr-elena') return true;
     if (normalizedEmail === 'marcus.chen@bioscribe.io' && u.id === 'usr-marcus') return true;
     if (normalizedEmail === 'sarah.jenkins@bioscribe.io' && u.id === 'usr-sarah') return true;

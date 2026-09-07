@@ -14,17 +14,21 @@ import {
   Activity,
   FileCheck2,
   BookOpen,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 
 export const AuditLogPage: React.FC = () => {
-  const { error } = useNotification();
+  const { error, success } = useNotification();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allIntegrityValid, setAllIntegrityValid] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAction, setSelectedAction] = useState('all');
   const [selectedEntity, setSelectedEntity] = useState('all');
 
-  const fetchAuditLogs = async () => {
+  const fetchAuditLogs = async (showNotification = false) => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -39,6 +43,16 @@ export const AuditLogPage: React.FC = () => {
       }>(`/audit-trail?${params.toString()}`);
 
       setLogs(data.logs);
+      setAllIntegrityValid(data.allIntegrityValid);
+      setTotalCount(data.totalCount);
+
+      if (showNotification) {
+        if (data.allIntegrityValid) {
+          success('Integrity Verified', `All ${data.totalCount} audit ledger blocks confirmed 100% cryptographically valid.`);
+        } else {
+          error('Integrity Alert', 'Discrepancy detected in audit ledger checksum!');
+        }
+      }
     } catch (err: any) {
       error('Failed to load audit trail', err.message);
     } finally {
@@ -64,11 +78,35 @@ export const AuditLogPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Global Integrity Seal */}
-        <div className="flex items-center space-x-2.5 px-4 py-2 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-300 shadow-sm">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span className="font-semibold">Audit Integrity Status:</span>
-          <span className="font-mono font-bold text-white">ALL CHECKSUMS VALID</span>
+        {/* Global Integrity Seal & Re-verify Button */}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => fetchAuditLogs(true)}
+            disabled={loading}
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-xs text-slate-200 transition"
+            title="Re-run SHA-256 integrity verification over entire audit ledger"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-brand-400 ${loading ? 'animate-spin' : ''}`} />
+            <span>Re-verify Ledger</span>
+          </button>
+
+          <div
+            className={`flex items-center space-x-2.5 px-4 py-2 rounded-xl border text-xs shadow-sm ${
+              allIntegrityValid
+                ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+                : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+            }`}
+          >
+            {allIntegrityValid ? (
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-400" />
+            )}
+            <span className="font-semibold">Audit Integrity:</span>
+            <span className="font-mono font-bold text-white">
+              {allIntegrityValid ? `ALL ${totalCount} CHECKSUMS VALID` : 'TAMPER DETECTED'}
+            </span>
+          </div>
         </div>
       </div>
 
