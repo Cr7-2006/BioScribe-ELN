@@ -37,9 +37,7 @@ services:
 
   # Express.js + TypeScript REST API
   api:
-    build:
-      context: ./server
-      dockerfile: ../Dockerfile.server
+    build: ./server
     container_name: bioscribe_api
     restart: unless-stopped
     depends_on:
@@ -59,9 +57,7 @@ services:
 
   # React + TypeScript + Vite SPA Client
   client:
-    build:
-      context: ./client
-      dockerfile: ../Dockerfile.client
+    build: ./client
     container_name: bioscribe_client
     restart: unless-stopped
     depends_on:
