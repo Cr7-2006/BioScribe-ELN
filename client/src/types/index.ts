@@ -1,11 +1,18 @@
 export type UserRole = 'researcher' | 'reviewer' | 'qa_manager' | 'admin';
+export type UserStatus = 'active' | 'pending_approval' | 'rejected' | 'deactivated';
 
 export interface User {
   id: string;
   name: string;
   email: string;
+  username?: string;
   role: UserRole;
   department: string;
+  status?: UserStatus;
+  justification?: string;
+  approvedAt?: string;
+  approvedBy?: string;
+  createdAt?: string;
 }
 
 export type ExperimentStatus = 'draft' | 'in_review' | 'approved' | 'rejected';

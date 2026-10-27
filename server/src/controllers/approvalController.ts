@@ -5,6 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 import { computeSignatureDigest } from '../services/crypto';
 import { recordAuditLog } from '../services/audit';
 import { Approval, ApprovalRole } from '../types';
+import { getSafeIsoDate } from '../utils/date';
 
 function getParamStr(param: string | string[] | undefined): string {
   if (!param) return '';
@@ -103,7 +104,7 @@ export async function signApproval(req: AuthRequest, res: Response) {
     return res.status(400).json({ message: `This approval is already ${approval.status}.` });
   }
 
-  // 21 CFR Part 11 Rule: Dual-factor authentication required at time of signature
+  // Re-authentication rule: Dual-factor credential verification required at time of signature
   const userRecord = dbManager.db.users.find((u) => u.id === user.id);
   if (!userRecord || !userRecord.passwordHash) {
     return res.status(401).json({ message: 'Signer credentials verification failed.' });
@@ -111,7 +112,7 @@ export async function signApproval(req: AuthRequest, res: Response) {
 
   if (!password) {
     return res.status(400).json({
-      message: '21 CFR Part 11 Compliance: Password re-verification is required to execute an Electronic Signature.',
+      message: 'Password re-verification is required to execute an Electronic Signature.',
     });
   }
 
@@ -120,11 +121,10 @@ export async function signApproval(req: AuthRequest, res: Response) {
     return res.status(401).json({ message: 'Invalid signature authentication password. Signing ceremony aborted.' });
   }
 
-  // 21 CFR Part 11 & GLP Segregation of Duties:
-  // QA Compliance release must be executed by QA Manager or Admin
+  // Segregation of Duties: QA Compliance release must be executed by QA Manager or Admin
   if (approval.role === 'qa_compliance' && user.role !== 'qa_manager' && user.role !== 'admin') {
     return res.status(403).json({
-      message: '21 CFR Part 11 Compliance Violation: QA Compliance signatures require QA Manager or Admin credentials.',
+      message: 'Compliance Violation: QA Compliance signatures require QA Manager or Admin credentials.',
     });
   }
 
@@ -142,7 +142,7 @@ export async function signApproval(req: AuthRequest, res: Response) {
     return res.status(404).json({ message: 'Referenced experiment or version record missing.' });
   }
 
-  const now = new Date().toISOString();
+  const now = getSafeIsoDate();
   const effectiveReason = signatureReason || approval.signatureReason;
 
   if (decision === 'approve') {
@@ -160,7 +160,7 @@ export async function signApproval(req: AuthRequest, res: Response) {
     approval.reviewerName = user.name;
     approval.signatureReason = effectiveReason;
     approval.signatureDigest = signatureDigest;
-    approval.comments = comments || 'Approved pursuant to 21 CFR Part 11 compliance standards.';
+    approval.comments = comments || 'Approved pursuant to laboratory compliance standards.';
     approval.signedAt = now;
 
     // Lock the version immutably
@@ -175,7 +175,7 @@ export async function signApproval(req: AuthRequest, res: Response) {
       action: 'E_SIGNATURE',
       entityType: 'approval',
       entityId: approval.id,
-      details: `21 CFR Part 11 E-Signature executed by ${user.name} for ${experiment.experimentNumber} (v${version.versionNumber}). Reason: "${effectiveReason}". Digest: ${signatureDigest.substring(0, 12)}...`,
+      details: `Electronic Signature executed by ${user.name} for ${experiment.experimentNumber} (v${version.versionNumber}). Reason: "${effectiveReason}". Digest: ${signatureDigest.substring(0, 12)}...`,
       metadata: {
         experimentNumber: experiment.experimentNumber,
         versionNumber: version.versionNumber,
@@ -207,7 +207,7 @@ export async function signApproval(req: AuthRequest, res: Response) {
   dbManager.saveLocalData();
 
   return res.json({
-    message: decision === 'approve' ? '21 CFR Part 11 Electronic Signature recorded.' : 'Record rejected.',
+    message: decision === 'approve' ? 'Electronic Signature recorded.' : 'Record rejected.',
     approval,
     experiment,
   });

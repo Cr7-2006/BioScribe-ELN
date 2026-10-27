@@ -24,12 +24,22 @@ import {
 import { getApprovals, requestApproval, signApproval } from '../controllers/approvalController';
 import { getAuditLogs } from '../controllers/auditController';
 import { getStats } from '../controllers/statsController';
-import { authenticate } from '../middleware/auth';
+import {
+  getAllUsers,
+  getPendingUsersCount,
+  approveUser,
+  rejectUser,
+  deactivateUser,
+  reactivateUser,
+} from '../controllers/adminController';
+import { globalSearch } from '../controllers/searchController';
+import { authenticate, requireRole } from '../middleware/auth';
+import { authLimiter, signatureLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
 // Public Auth Endpoints
-router.post('/auth/login', login);
+router.post('/auth/login', authLimiter, login);
 router.post('/auth/register', register);
 router.get('/auth/seed-accounts', getSeedAccounts);
 
@@ -41,6 +51,9 @@ router.get('/auth/me', getCurrentUser);
 
 // Dashboard Metrics
 router.get('/stats', getStats);
+
+// Global Full-Text Search
+router.get('/search', globalSearch);
 
 // Projects
 router.get('/projects', getProjects);
@@ -69,9 +82,17 @@ router.post('/formulations/calculate', calculateBatchScale);
 // Approvals & Electronic Signatures
 router.get('/approvals', getApprovals);
 router.post('/approvals/request', requestApproval);
-router.post('/approvals/:id/sign', signApproval);
+router.post('/approvals/:id/sign', signatureLimiter, signApproval);
 
-// Audit Trail (21 CFR Part 11 Compliance)
+// Audit Trail
 router.get('/audit-trail', getAuditLogs);
+
+// Administration & User Access Verification
+router.get('/admin/users', requireRole(['admin', 'qa_manager']), getAllUsers);
+router.get('/admin/users/pending-count', requireRole(['admin', 'qa_manager']), getPendingUsersCount);
+router.post('/admin/users/:id/approve', requireRole(['admin', 'qa_manager']), approveUser);
+router.post('/admin/users/:id/reject', requireRole(['admin', 'qa_manager']), rejectUser);
+router.post('/admin/users/:id/deactivate', requireRole(['admin']), deactivateUser);
+router.post('/admin/users/:id/activate', requireRole(['admin']), reactivateUser);
 
 export default router;

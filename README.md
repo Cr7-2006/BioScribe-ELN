@@ -1,20 +1,20 @@
 # 🧬 BioScribe ELN (Electronic Laboratory Notebook)
 
-> High-integrity, version-controlled **Electronic Laboratory Notebook (ELN)** and research management platform engineered for biotech, pharma, and academic research teams. Adheres to **FDA 21 CFR Part 11** and **Good Laboratory Practice (GLP)** standards with cryptographically sealed revision histories, chemical/biological formulation calculators, structured observation loggers, and dual-authenticated electronic signatures.
+> High-integrity, version-controlled **Electronic Laboratory Notebook (ELN)** and research management platform engineered for biotech, chemical formulation, and academic research teams. Features cryptographically sealed revision histories, chemical/biological formulation calculators, 2D barcode reagent inventory scanners, advanced full-text search, structured observation loggers, and authenticated electronic signatures.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Technology Stack (MERN Development)
 
 | Layer | Technologies & Tools |
 | :--- | :--- |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons |
+| **Architecture** | **MERN Stack** (MongoDB, Express.js, React, Node.js) |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, jsPDF |
 | **Backend REST API** | Node.js (v20+ / v22+ / v26), Express.js, TypeScript |
-| **Database Layer** | PostgreSQL 16 (`pg` connection pool) with resilient local JSON/SQLite zero-config fallback |
-| **Caching & Presence** | Redis 7 (`ioredis`) with resilient in-memory TTL caching |
-| **Security & Compliance** | JWT, Bcrypt, SHA-256 Cryptographic Fingerprints, 21 CFR Part 11 Electronic Signatures |
-| **Containerization** | Docker, Docker Compose, Multi-stage builds, Nginx reverse proxy |
-| **VCS & CI/CD** | Git, GitHub Actions (`.github/workflows/ci.yml`) |
+| **Database Layer** | MongoDB 7.0 (Mongoose ODM schemas & models) / MongoDB Atlas |
+| **State & Protocol Caching**| Native Node.js State & Draft Store |
+| **Security & Verification** | JWT, Bcrypt, SHA-256 Cryptographic Seals, Electronic Signatures |
+| **Database Tooling** | MongoDB Compass GUI |
 
 ---
 
@@ -29,95 +29,107 @@
                                                       ▼
                           ┌────────────────────────────────────────────────────────┐
                           │            Node.js + Express.js REST API               │
-                          │   (SHA-256 Hasher, Version Engine, 21 CFR Part 11)     │
-                          └─────────────┬───────────────────────────┬──────────────┘
-                                        │                           │
-                                        ▼                           ▼
-                         ┌─────────────────────────────┐   ┌────────────────────────┐
-                         │        Redis 7 Cache        │   │     PostgreSQL 16      │
-                         │ (Drafts & Real-time Session)│   │  (Relational & Audit)  │
-                         └─────────────────────────────┘   └────────────────────────┘
+                          │   (SHA-256 Hasher, Version Engine, Search, Auth)       │
+                          └───────────────────────────┬────────────────────────────┘
+                                                      │
+                                                      ▼
+                                           ┌────────────────────────┐
+                                           │      MongoDB 7.0       │
+                                           │ (Mongoose Collections) │
+                                           └────────────────────────┘
 ```
 
 ---
 
-## 🧪 Core Research & Compliance Features
+## 🧪 Core Research & System Features
 
 ### 1. Version-Controlled Laboratory Notebooks (`/api/experiments`)
 - **Immutable Revision History**: Every protocol save or amendment produces a discrete version snapshot (`v1.0`, `v1.1`, `v2.0`).
 - **Cryptographic Fingerprinting**: Each version snapshot is hashed with a tamper-evident **SHA-256** checksum over protocol steps, critical quality attributes, author identity, and timestamps.
 - **Visual Revision Diff Inspector**: Side-by-side and unified diff comparison identifying added steps, removed steps, modified parameters (temperatures, durations), and textual changes.
 
-### 2. Chemical & Biological Formulation Builder (`/api/formulations`)
-- Reagent registry with CAS numbers, lot numbers, molecular weights, and GHS hazard pictograms.
+### 2. Certified PDF Report Export
+- **Cryptographic Verification Seal**: Embeds a tamper-proof verification stamp and 2D QR validation code linked to the document's SHA-256 hash.
+- **Publication-Grade Run Sheets**: Generates official laboratory run sheets including sequential protocol steps, analytical observation logs, formulation stoichiometry tables, and reviewer electronic signatures.
+
+### 3. 2D Barcode & QR Code Scanning for Reagents
+- **Container Verification**: Scans chemical lots to verify CAS numbers, storage temperatures, and expiration dates.
+- **Expiry Protection**: Color-coded safety status flags expired or expiring chemicals before they can be used in formulations.
+- **Printable 2D QR Labels**: Generates standardized container stickers with GHS chemical safety badges.
+- **1-Click Auto-Population**: Directly imports scanned reagent parameters into formulations.
+
+### 4. Advanced Full-Text Search (`Ctrl+K`)
+- **Unified Global Search**: Searches across experiments, protocol versions, formulations, chemical CAS numbers, and audit logs.
+- **Keyboard Shortcut**: Instant modal activated anywhere using `Ctrl+K` or `Cmd+K` with categorized filter pills and direct navigation.
+
+### 5. Chemical & Biological Formulation Builder (`/api/formulations`)
+- Reagent registry with CAS numbers, lot numbers, molecular weights, and GHS hazard classifications.
 - **Stoichiometry Calculator**: Live computation of molar concentrations ($mM$, $M$) and effective purity.
 - **Dynamic Batch Scaling**: One-click recipe scaling (e.g. 100 mL to 5,000 mL) with automatic reagent recalculation.
 
-### 3. Real-Time Observations & Time-Series Data Logger (`/api/experiments/:id/observations`)
-- Structured logging for measurements, spectrophotometry/SPR readings, chromatography (HPLC), and environmental parameters.
-- Out-of-specification anomaly flagging and timestamped operator notes.
-
-### 4. 21 CFR Part 11 Compliant Electronic Signatures (`/api/approvals`)
+### 6. Electronic Signature Attestation (`/api/approvals`)
 - Multi-tier sign-off pipeline: `Draft` &rarr; `In Review` &rarr; `Peer Reviewed` &rarr; `QA Approved` / `Rejected`.
-- **Dual-Factor Authentication Ceremony**: Requires password re-entry at the time of signature to verify identity.
-- **Legal Intent Manifestation**: Captures explicit signature reasons ("Peer Review Verification", "Quality Assurance Release").
-- **Cryptographic Digest**: Generates an immutable signature digest sealing the version hash with the signer's identity and timestamp. Once approved, the record is permanently locked against modifications.
+- **Identity Re-authentication**: Requires credential verification at time of signature ceremony.
+- **Legal Attestation Reason**: Captures explicit signature intent ("Peer Review Verification", "Quality Assurance Release").
+- **Cryptographic Digest**: Generates an immutable signature digest sealing the version hash with the signer's identity and timestamp.
 
-### 5. Tamper-Evident Audit Trail (`/api/audit-trail`)
-- Append-only regulatory ledger recording all creates, updates, version commits, electronic signatures, and exports.
+### 7. Tamper-Evident Audit Trail (`/api/audit-trail`)
+- Append-only ledger recording all creates, updates, version commits, electronic signatures, and exports.
 - Every audit entry includes an independently verifiable SHA-256 checksum.
-
-### 6. Official GLP Printable / PDF Export
-- Generates clean, publication- and audit-ready experiment reports complete with protocol steps table, observation metrics, and certified electronic signature blocks.
 
 ---
 
-## 🚀 Quickstart Guide
+## 🚀 Quickstart Guide (Running on this PC)
 
-### Option A: Local Standalone Mode (Zero External Dependencies Required)
+Running BioScribe ELN requires Node.js and MongoDB (no Docker needed):
 
-BioScribe features an automatic resilient fallback layer that allows you to run immediately without needing a local PostgreSQL or Redis server pre-installed!
-
-#### 1. Start Backend Server
-```bash
+#### 1. Start Backend Server (Express + MongoDB)
+```powershell
 cd server
-npm install
 npm run dev
 ```
-*The server will boot on `http://localhost:5000` and automatically seed initial research projects, formulations, and experiment records.*
+*The server boots on `http://localhost:5001`, connects to MongoDB on `mongodb://localhost:27017/bioscribe_eln`, and loads existing research projects, formulations, and experiment records.*
 
-#### 2. Start Frontend Client (in a new terminal)
-```bash
+#### 2. Start Frontend Client (React + Vite)
+In a new terminal window:
+```powershell
 cd client
-npm install
 npm run dev
 ```
 *Open `http://localhost:5173` in your browser.*
 
 ---
 
-### Option B: Docker Compose Multi-Container Deployment
+## 🍃 MongoDB Compass GUI Integration
 
-Spin up the full containerized production stack (PostgreSQL 16, Redis 7, Express API, and Nginx-backed React frontend) with a single command:
+You can view and inspect the live database documents using **MongoDB Compass**:
 
-```bash
-docker compose up --build
-```
-* Access the BioScribe Application at: `http://localhost:80`
-* Access the REST API at: `http://localhost:5000/api`
+1. Launch **MongoDB Compass** (`C:\Users\KAMALESH\AppData\Local\MongoDBCompass\MongoDBCompass.exe`).
+2. Paste the connection string:
+   ```text
+   mongodb://localhost:27017
+   ```
+3. Click **Connect**.
+4. In the databases list, open **`bioscribe_eln`** to view all live collections:
+   - **`users`**: Researcher, reviewer, QA, and administrator profiles
+   - **`projects`**: High-level therapeutic and biotechnology research projects
+   - **`experiments`**: Active laboratory notebook experiment records
+   - **`experimentversions`**: Protocol revision snapshots with SHA-256 hashes
+   - **`observations`**: Structured experimental measurements and readings
+   - **`formulations`**: Chemical recipes, CAS numbers, and stoichiometry
+   - **`approvals`**: Electronic signature ceremony records
+   - **`auditlogs`**: Tamper-evident audit ledger with checksum validation
 
 ---
 
-## 👥 Demo Scientific Accounts (1-Click Role Switcher)
-
-The application includes an in-app role switcher in the top navigation bar to test review and sign-off ceremonies across different laboratory roles:
+## 👥 Demo Scientific Accounts
 
 | Name | Role | Email | Default Password | Laboratory Function |
 | :--- | :--- | :--- | :--- | :--- |
 | **Dr. Elena Vance** | Researcher (Author) | `elena.vance@bioscribe.io` | `Password123!` | Protocol Authoring & Data Logging |
 | **Dr. Marcus Chen** | Reviewer (PI) | `marcus.chen@bioscribe.io` | `Password123!` | Peer Review Verification |
-| **Sarah Jenkins, RAC** | QA Manager (Auditor) | `sarah.jenkins@bioscribe.io` | `Password123!` | 21 CFR Part 11 Regulatory Release |
-| **Admin** | Administrator | `admin@bioscribe.io` | `Password123!` | System Configuration & Diagnostics |
+| **Sarah Jenkins** | QA Manager (Auditor) | `sarah.jenkins@bioscribe.io` | `Password123!` | Formal Quality Assurance Release |
+| **Admin** | Administrator | `admin@bioscribe.io` | `Password123!` | User Access & System Controls |
 
 ---
 
@@ -128,7 +140,8 @@ The application includes an in-app role switcher in the top navigation bar to te
 | `POST` | `/api/auth/login` | Authenticate user & issue JWT bearer token |
 | `GET` | `/api/auth/me` | Fetch authenticated researcher profile |
 | `GET` | `/api/auth/seed-accounts` | List demo accounts for rapid testing |
-| `GET` | `/api/stats` | Dashboard telemetry, compliance metrics & counts |
+| `GET` | `/api/stats` | Dashboard telemetry, verification metrics & counts |
+| `GET` | `/api/search` | Global full-text search across experiments, formulations, CAS#, audit logs |
 | `GET` | `/api/projects` | List research studies and therapeutic areas |
 | `POST` | `/api/projects` | Register new research project |
 | `GET` | `/api/experiments` | Search and filter laboratory notebooks |
@@ -144,22 +157,5 @@ The application includes an in-app role switcher in the top navigation bar to te
 | `POST` | `/api/formulations/calculate` | Compute stoichiometry and batch scaling |
 | `GET` | `/api/approvals` | List approval requests & sign-off queue |
 | `POST` | `/api/approvals/request` | Submit notebook version for review |
-| `POST` | `/api/approvals/:id/sign` | Execute 21 CFR Part 11 Electronic Signature ceremony |
+| `POST` | `/api/approvals/:id/sign` | Execute Electronic Signature ceremony |
 | `GET` | `/api/audit-trail` | Fetch immutable audit ledger with checksum validation |
-
----
-
-## 🧪 Automated Testing
-
-Execute the end-to-end verification test suite covering authentication, version commits, SHA-256 hashing, diffing, batch scaling, and electronic signature ceremonies:
-
-```bash
-cd server
-npm test
-```
-
----
-
-## 🛡️ License
-
-Proprietary Research & Development Platform. Designed for GLP and FDA 21 CFR Part 11 compliance.

@@ -41,3 +41,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch & Office Lock Files
+scratch/
+~$*
+

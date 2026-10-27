@@ -1,10 +1,10 @@
 import { Response } from 'express';
 import { dbManager } from '../config/db';
-import { cache } from '../config/redis';
 import { AuthRequest } from '../middleware/auth';
 import { computeVersionHash } from '../services/crypto';
 import { recordAuditLog } from '../services/audit';
 import { Experiment, ExperimentVersion, ProtocolStep } from '../types';
+import { getSafeIsoDate } from '../utils/date';
 
 function getParamStr(param: string | string[] | undefined): string {
   if (!param) return '';
@@ -94,7 +94,7 @@ export async function createExperiment(req: AuthRequest, res: Response) {
   }
 
   const expCount = dbManager.db.experiments.length + 1;
-  const experimentNumber = `EXP-2026-${String(expCount).padStart(4, '0')}`;
+  const experimentNumber = `EXP-2025-${String(expCount).padStart(4, '0')}`;
   const experimentId = 'exp-' + Math.random().toString(36).substring(2, 9);
   const versionId = 'ver-' + Math.random().toString(36).substring(2, 9);
 
@@ -120,7 +120,7 @@ export async function createExperiment(req: AuthRequest, res: Response) {
     authorId: user.id,
   });
 
-  const now = new Date().toISOString();
+  const now = getSafeIsoDate();
 
   const initialVersion: ExperimentVersion = {
     id: versionId,
@@ -172,6 +172,7 @@ export async function createExperiment(req: AuthRequest, res: Response) {
   return res.status(201).json({
     experiment: newExperiment,
     currentVersion: initialVersion,
+    version: initialVersion,
   });
 }
 
@@ -187,7 +188,7 @@ export async function commitNewVersion(req: AuthRequest, res: Response) {
 
   if (experiment.status === 'approved') {
     return res.status(400).json({
-      message: 'This experiment has been formally approved and locked under 21 CFR Part 11. Create a fork or amendment instead.',
+      message: 'This experiment has been formally approved and locked. Create a fork or amendment instead.',
     });
   }
 
@@ -219,7 +220,7 @@ export async function commitNewVersion(req: AuthRequest, res: Response) {
     authorId: user.id,
   });
 
-  const now = new Date().toISOString();
+  const now = getSafeIsoDate();
   const newVersionId = 'ver-' + Math.random().toString(36).substring(2, 9);
 
   // Lock previous versions
@@ -256,8 +257,8 @@ export async function commitNewVersion(req: AuthRequest, res: Response) {
   dbManager.db.experimentVersions.unshift(newVersion);
   dbManager.saveLocalData();
 
-  // Clear Redis draft cache
-  await cache.del(`draft:${id}:${user.id}`);
+  // Clear draft cache
+  draftMemoryStore.delete(`draft:${id}:${user.id}`);
 
   await recordAuditLog({
     userId: user.id,
@@ -338,12 +339,14 @@ export async function getVersionDiff(req: AuthRequest, res: Response) {
   });
 }
 
-// Redis Draft caching
+// Protocol Draft caching (In-Memory Node.js Store)
+const draftMemoryStore = new Map<string, any>();
+
 export async function getDraft(req: AuthRequest, res: Response) {
   const id = getParamStr(req.params.id);
   const user = req.user!;
-  const draft = await cache.get(`draft:${id}:${user.id}`);
-  return res.json({ draft: draft ? JSON.parse(draft) : null });
+  const draft = draftMemoryStore.get(`draft:${id}:${user.id}`);
+  return res.json({ draft: draft || null });
 }
 
 export async function saveDraft(req: AuthRequest, res: Response) {
@@ -351,7 +354,6 @@ export async function saveDraft(req: AuthRequest, res: Response) {
   const user = req.user!;
   const { data } = req.body;
 
-  // Cache in Redis for 48 hours
-  await cache.set(`draft:${id}:${user.id}`, JSON.stringify(data), 172800);
+  draftMemoryStore.set(`draft:${id}:${user.id}`, data);
   return res.json({ success: true, savedAt: new Date().toISOString() });
 }

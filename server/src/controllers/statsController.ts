@@ -1,6 +1,5 @@
 import { Response } from 'express';
 import { dbManager } from '../config/db';
-import { cache } from '../config/redis';
 import { AuthRequest } from '../middleware/auth';
 
 export async function getStats(req: AuthRequest, res: Response) {
@@ -13,11 +12,13 @@ export async function getStats(req: AuthRequest, res: Response) {
   const totalObservations = dbManager.db.observations.length;
   const pendingApprovals = dbManager.db.approvals.filter((a) => a.status === 'pending').length;
   const totalAuditEntries = dbManager.db.auditLogs.length;
+  const totalUsers = dbManager.db.users.length;
+  const pendingUsers = dbManager.db.users.filter((u) => u.status === 'pending_approval').length;
 
-  const isRedisActive = cache.isConnected();
-
-  return res.json({
+  const payload = {
     metrics: {
+      totalUsers,
+      pendingUsers,
       totalExperiments,
       draftExperiments,
       inReviewExperiments,
@@ -28,10 +29,14 @@ export async function getStats(req: AuthRequest, res: Response) {
       totalAuditEntries,
     },
     system: {
-      complianceStandard: 'FDA 21 CFR Part 11 & GLP Compliant',
+      integrityStandard: 'SHA-256 Cryptographic Audit Ledger',
       cryptographicHashing: 'SHA-256',
-      redisCacheStatus: isRedisActive ? 'Active (Connected)' : 'Fallback In-Memory Cache Active',
-      databaseStorage: dbManager.isPostgres ? 'PostgreSQL 16 Engine' : 'Resilient File-Backed Relational Store',
+      backendRuntime: 'Node.js + Express REST API (MERN)',
+      databaseStorage: dbManager.isMongo
+        ? 'MongoDB 7.0 Engine (MERN Stack)'
+        : 'Resilient Local Store (MongoDB Offline Mode)',
     },
-  });
+  };
+
+  return res.json(payload);
 }

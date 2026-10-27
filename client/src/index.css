@@ -3,26 +3,59 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  html.light {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 font-sans;
+    @apply font-sans antialiased transition-colors duration-200;
+  }
+
+  html.dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+
+  html.light body {
+    @apply bg-slate-100 text-slate-900;
   }
 }
 
-/* Custom scrollbar for dark science UI */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-::-webkit-scrollbar-track {
+html.dark ::-webkit-scrollbar-track {
   background: #090d16;
 }
 
-::-webkit-scrollbar-thumb {
+html.dark ::-webkit-scrollbar-thumb {
   background: #1e293b;
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+html.dark ::-webkit-scrollbar-thumb:hover {
   background: #334155;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

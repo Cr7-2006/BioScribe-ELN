@@ -27,37 +27,57 @@ export async function seedDatabase() {
       id: 'usr-elena',
       name: 'Dr. Kamalesh',
       email: 'kamalesh@bioscribe.io',
+      username: 'kamalesh',
       role: 'researcher',
       department: 'Molecular Oncology & Proteomics',
+      status: 'active',
       passwordHash,
-      createdAt: '2026-01-10T08:00:00.000Z',
+      createdAt: '2025-01-10T08:00:00.000Z',
     },
     {
       id: 'usr-marcus',
       name: 'Dr. Thameem',
       email: 'thameem@bioscribe.io',
+      username: 'thameem',
       role: 'reviewer',
       department: 'Bioprocess & Cell Engineering',
+      status: 'active',
       passwordHash,
-      createdAt: '2026-01-10T08:00:00.000Z',
+      createdAt: '2025-01-10T08:00:00.000Z',
     },
     {
       id: 'usr-sarah',
       name: 'Dr. Subbu',
       email: 'subbu@bioscribe.io',
+      username: 'subbu',
       role: 'qa_manager',
       department: 'Quality Assurance & Regulatory Compliance',
+      status: 'active',
       passwordHash,
-      createdAt: '2026-01-10T08:00:00.000Z',
+      createdAt: '2025-01-10T08:00:00.000Z',
     },
     {
       id: 'usr-admin',
       name: 'Lab Informatics Administrator',
       email: 'admin@bioscribe.io',
+      username: 'admin',
       role: 'admin',
       department: 'Research Computing & Informatics',
+      status: 'active',
       passwordHash,
-      createdAt: '2026-01-10T08:00:00.000Z',
+      createdAt: '2025-01-10T08:00:00.000Z',
+    },
+    {
+      id: 'usr-sarah-j',
+      name: 'Dr. Sarah Jenkins',
+      email: 'sarah.jenkins@bioscribe.io',
+      username: 'sarah.jenkins',
+      role: 'researcher',
+      department: 'Biochemistry & Drug Discovery',
+      status: 'pending_approval',
+      justification: 'Analytical chromatography & protocol verification access',
+      passwordHash,
+      createdAt: '2025-09-12T10:30:00.000Z',
     },
   ];
 
@@ -70,7 +90,7 @@ export async function seedDatabase() {
       therapeuticArea: 'Oncology',
       leadId: 'usr-elena',
       leadName: 'Dr. Kamalesh',
-      createdAt: '2026-01-15T09:00:00.000Z',
+      createdAt: '2025-01-15T09:00:00.000Z',
     },
     {
       id: 'prj-imm-04',
@@ -80,7 +100,7 @@ export async function seedDatabase() {
       therapeuticArea: 'Cell & Gene Therapy',
       leadId: 'usr-marcus',
       leadName: 'Dr. Thameem',
-      createdAt: '2026-02-01T10:00:00.000Z',
+      createdAt: '2025-02-01T10:00:00.000Z',
     },
     {
       id: 'prj-syn-09',
@@ -90,7 +110,7 @@ export async function seedDatabase() {
       therapeuticArea: 'Biochemical Synthesis',
       leadId: 'usr-elena',
       leadName: 'Dr. Kamalesh',
-      createdAt: '2026-02-20T11:00:00.000Z',
+      createdAt: '2025-02-20T11:00:00.000Z',
     },
   ];
 
@@ -106,15 +126,15 @@ export async function seedDatabase() {
       actualYieldPercentage: 99.4,
       authorId: 'usr-elena',
       authorName: 'Dr. Kamalesh',
-      createdAt: '2026-02-05T14:30:00.000Z',
-      updatedAt: '2026-02-05T14:30:00.000Z',
+      createdAt: '2025-02-05T14:30:00.000Z',
+      updatedAt: '2025-02-05T14:30:00.000Z',
       ingredients: [
         {
           id: 'ing-1',
           formulationId: 'form-kras-504',
           name: 'Tris(hydroxymethyl)aminomethane (Tris Base)',
           casNumber: '77-86-1',
-          lotNumber: 'TRIS-2026-09A',
+          lotNumber: 'TRIS-2025-09A',
           molecularWeight: 121.14,
           purityPercentage: 99.8,
           targetQuantity: 6.057,
@@ -174,8 +194,8 @@ export async function seedDatabase() {
       actualYieldPercentage: 98.8,
       authorId: 'usr-marcus',
       authorName: 'Dr. Thameem',
-      createdAt: '2026-02-12T09:15:00.000Z',
-      updatedAt: '2026-02-12T09:15:00.000Z',
+      createdAt: '2025-02-12T09:15:00.000Z',
+      updatedAt: '2025-02-12T09:15:00.000Z',
       ingredients: [
         {
           id: 'ing-5',
@@ -308,7 +328,7 @@ export async function seedDatabase() {
       changeSummary: 'Initial experimental design and baseline SPR protocol commitment.',
       hashSha256: exp1V1Hash,
       isLocked: true,
-      createdAt: '2026-02-18T10:00:00.000Z',
+      createdAt: '2025-02-18T10:00:00.000Z',
     },
     {
       id: 'ver-kras-002',
@@ -324,11 +344,11 @@ export async function seedDatabase() {
       changeSummary: 'Added Step 5 regeneration pulse protocol and updated steady-state kinetic evaluation parameters.',
       hashSha256: exp1V2Hash,
       isLocked: false,
-      createdAt: '2026-02-22T16:45:00.000Z',
+      createdAt: '2025-02-22T16:45:00.000Z',
     },
   ];
 
-  // Experiment 2: Approved Experiment with 21 CFR Part 11 Electronic Signature
+  // Experiment 2: Approved Experiment with Electronic Signature
   const exp2Id = 'exp-cart-cryo-0038';
   const exp2Steps = [
     {
@@ -373,7 +393,7 @@ export async function seedDatabase() {
     objective: 'Establish Good Manufacturing Practice (GMP) compliant vitrification SOP achieving >90% cell viability post-cryo preservation.',
     hypothesis: 'Reduced DMSO (5%) formulation with 50 mM trehalose preserves membrane integrity superior to standard 10% DMSO without cytotoxicity.',
     protocolSteps: exp2Steps,
-    conclusion: 'Formulation FORM-CRYO-101 demonstrated 94.2% viability, passing GLP release threshold (>85%). Protocol certified for Phase I clinical material.',
+    conclusion: 'Formulation FORM-CRYO-101 demonstrated 94.2% viability, passing quality release threshold (>85%). Protocol certified for Phase I clinical material.',
     authorId: 'usr-marcus',
   });
 
@@ -386,13 +406,13 @@ export async function seedDatabase() {
       objective: 'Establish Good Manufacturing Practice (GMP) compliant vitrification SOP achieving >90% cell viability post-cryo preservation.',
       hypothesis: 'Reduced DMSO (5%) formulation with 50 mM trehalose preserves membrane integrity superior to standard 10% DMSO without cytotoxicity.',
       protocolSteps: exp2Steps,
-      conclusion: 'Formulation FORM-CRYO-101 demonstrated 94.2% viability, passing GLP release threshold (>85%). Protocol certified for Phase I clinical material.',
+      conclusion: 'Formulation FORM-CRYO-101 demonstrated 94.2% viability, passing laboratory standards release threshold (>85%). Protocol certified for Phase I clinical material.',
       authorId: 'usr-marcus',
       authorName: 'Dr. Thameem',
       changeSummary: 'Finalized and validated standard operating protocol with multi-lot replicates.',
       hashSha256: exp2Hash,
       isLocked: true,
-      createdAt: '2026-02-14T11:00:00.000Z',
+      createdAt: '2025-02-12T08:00:00.000Z',
     },
   ];
 
@@ -449,7 +469,7 @@ export async function seedDatabase() {
       changeSummary: 'Work in progress draft setup.',
       hashSha256: exp3Hash,
       isLocked: false,
-      createdAt: '2026-03-01T09:30:00.000Z',
+      createdAt: '2025-03-01T09:30:00.000Z',
     },
   ];
 
@@ -457,7 +477,7 @@ export async function seedDatabase() {
     {
       id: exp1Id,
       projectCode: 'PRJ-ONC-01',
-      experimentNumber: 'EXP-2026-0042',
+      experimentNumber: 'EXP-2025-0042',
       title: 'Dose-Response Surface Plasmon Resonance (SPR) of Small Molecule PROTAC Degrader BSC-401',
       objective: 'Quantify kinetic binding constants (ka, kd, and KD) of BSC-401 with recombinant KRAS G12D on gold CM5 sensor surface with regeneration protocol.',
       hypothesis: 'BSC-401 exhibits nanomolar binding affinity (KD < 15 nM) with slow dissociation kinetics compared to parental monovalent ligands.',
@@ -467,13 +487,13 @@ export async function seedDatabase() {
       authorId: 'usr-elena',
       authorName: 'Dr. Kamalesh',
       formulationId: 'form-kras-504',
-      createdAt: '2026-02-18T10:00:00.000Z',
-      updatedAt: '2026-02-22T16:45:00.000Z',
+      createdAt: '2025-02-18T10:00:00.000Z',
+      updatedAt: '2025-02-22T16:45:00.000Z',
     },
     {
       id: exp2Id,
       projectCode: 'PRJ-IMM-04',
-      experimentNumber: 'EXP-2026-0038',
+      experimentNumber: 'EXP-2025-0038',
       title: 'Validation of Cryopreservation Protocol for T-Cell Viability at -196°C Liquid Nitrogen',
       objective: 'Establish Good Manufacturing Practice (GMP) compliant vitrification SOP achieving >90% cell viability post-cryo preservation.',
       hypothesis: 'Reduced DMSO (5%) formulation with 50 mM trehalose preserves membrane integrity superior to standard 10% DMSO without cytotoxicity.',
@@ -483,13 +503,13 @@ export async function seedDatabase() {
       authorId: 'usr-marcus',
       authorName: 'Dr. Thameem',
       formulationId: 'form-cryo-101',
-      createdAt: '2026-02-12T08:00:00.000Z',
-      updatedAt: '2026-02-15T14:20:00.000Z',
+      createdAt: '2025-02-12T08:00:00.000Z',
+      updatedAt: '2025-02-15T14:20:00.000Z',
     },
     {
       id: exp3Id,
       projectCode: 'PRJ-SYN-09',
-      experimentNumber: 'EXP-2026-0055',
+      experimentNumber: 'EXP-2025-0055',
       title: 'HPLC Enantiomeric Excess Purity Analysis of Biocatalytic Transaminase Reaction',
       objective: 'Determine enantiomeric excess (ee%) of (R)-1-(4-trifluoromethylphenyl)ethylamine produced in enzymatic biocatalysis.',
       hypothesis: 'Engineered enzyme variant TA-048 will catalyze asymmetric amination with >98% enantioselectivity.',
@@ -498,8 +518,8 @@ export async function seedDatabase() {
       currentVersionNumber: '0.1',
       authorId: 'usr-elena',
       authorName: 'Dr. Kamalesh',
-      createdAt: '2026-03-01T09:30:00.000Z',
-      updatedAt: '2026-03-01T09:30:00.000Z',
+      createdAt: '2025-03-01T09:30:00.000Z',
+      updatedAt: '2025-03-01T09:30:00.000Z',
     },
   ];
 
@@ -507,7 +527,7 @@ export async function seedDatabase() {
     {
       id: 'obs-1',
       experimentId: exp1Id,
-      timestamp: '2026-02-22T11:15:00.000Z',
+      timestamp: '2025-02-22T11:15:00.000Z',
       recordedById: 'usr-elena',
       recordedByName: 'Dr. Kamalesh',
       category: 'spectroscopy',
@@ -516,12 +536,12 @@ export async function seedDatabase() {
       unit: 'RU',
       status: 'normal',
       notes: 'Initial CM5 chip immobilization reference level after running buffer wash.',
-      createdAt: '2026-02-22T11:15:00.000Z',
+      createdAt: '2025-02-22T11:15:00.000Z',
     },
     {
       id: 'obs-2',
       experimentId: exp1Id,
-      timestamp: '2026-02-22T12:00:00.000Z',
+      timestamp: '2025-02-22T12:00:00.000Z',
       recordedById: 'usr-elena',
       recordedByName: 'Dr. Kamalesh',
       category: 'measurement',
@@ -530,12 +550,12 @@ export async function seedDatabase() {
       unit: 'RU',
       status: 'normal',
       notes: 'Binding curve achieved rapid saturation with Langmuir 1:1 stoichiometry fit.',
-      createdAt: '2026-02-22T12:00:00.000Z',
+      createdAt: '2025-02-22T12:00:00.000Z',
     },
     {
       id: 'obs-3',
       experimentId: exp1Id,
-      timestamp: '2026-02-22T13:30:00.000Z',
+      timestamp: '2025-02-22T13:30:00.000Z',
       recordedById: 'usr-elena',
       recordedByName: 'Dr. Kamalesh',
       category: 'environmental',
@@ -544,12 +564,12 @@ export async function seedDatabase() {
       unit: '°C',
       status: 'normal',
       notes: 'Peltier element maintained within tolerance (±0.05°C).',
-      createdAt: '2026-02-22T13:30:00.000Z',
+      createdAt: '2025-02-22T13:30:00.000Z',
     },
     {
       id: 'obs-4',
       experimentId: exp1Id,
-      timestamp: '2026-02-22T14:10:00.000Z',
+      timestamp: '2025-02-22T14:10:00.000Z',
       recordedById: 'usr-elena',
       recordedByName: 'Dr. Kamalesh',
       category: 'measurement',
@@ -558,12 +578,12 @@ export async function seedDatabase() {
       unit: 'nM',
       status: 'normal',
       notes: 'ka = 4.12e5 (1/Ms), kd = 3.47e-3 (1/s). Chi-square = 0.42.',
-      createdAt: '2026-02-22T14:10:00.000Z',
+      createdAt: '2025-02-22T14:10:00.000Z',
     },
     {
       id: 'obs-5',
       experimentId: exp2Id,
-      timestamp: '2026-02-14T10:15:00.000Z',
+      timestamp: '2025-02-14T10:15:00.000Z',
       recordedById: 'usr-marcus',
       recordedByName: 'Dr. Thameem',
       category: 'measurement',
@@ -572,12 +592,12 @@ export async function seedDatabase() {
       unit: '%',
       status: 'normal',
       notes: 'Significantly exceeds 85% release criteria (p < 0.001 vs 10% DMSO control).',
-      createdAt: '2026-02-14T10:15:00.000Z',
+      createdAt: '2025-02-14T10:15:00.000Z',
     },
     {
       id: 'obs-6',
       experimentId: exp2Id,
-      timestamp: '2026-02-14T10:45:00.000Z',
+      timestamp: '2025-02-14T10:45:00.000Z',
       recordedById: 'usr-marcus',
       recordedByName: 'Dr. Thameem',
       category: 'measurement',
@@ -586,13 +606,13 @@ export async function seedDatabase() {
       unit: '%',
       status: 'normal',
       notes: 'Nalm-6 luciferase bioluminescence assay at 5:1 ratio.',
-      createdAt: '2026-02-14T10:45:00.000Z',
+      createdAt: '2025-02-14T10:45:00.000Z',
     },
   ];
 
-  // 21 CFR Part 11 Electronic Signature Ceremony for Exp 2
-  const signedTimestamp = '2026-02-15T14:20:00.000Z';
-  const sigReason = 'I approve this laboratory notebook record and confirm data integrity pursuant to 21 CFR Part 11 regulations.';
+  // Electronic Signature Ceremony for Exp 2
+  const signedTimestamp = '2025-02-15T14:20:00.000Z';
+  const sigReason = 'I approve this laboratory notebook record and confirm data integrity pursuant to laboratory standards.';
   const sigDigest = computeSignatureDigest({
     versionHash: exp2Hash,
     signerId: 'usr-sarah',
@@ -606,7 +626,7 @@ export async function seedDatabase() {
       id: 'appr-001',
       experimentId: exp1Id,
       experimentTitle: 'Dose-Response Surface Plasmon Resonance (SPR) of Small Molecule PROTAC Degrader BSC-401',
-      experimentNumber: 'EXP-2026-0042',
+      experimentNumber: 'EXP-2025-0042',
       versionId: 'ver-kras-002',
       versionNumber: '1.1',
       requesterId: 'usr-elena',
@@ -616,13 +636,13 @@ export async function seedDatabase() {
       role: 'peer_review',
       status: 'pending',
       signatureReason: 'Peer review verification of SPR kinetic fitting and regeneration protocol.',
-      createdAt: '2026-02-22T17:00:00.000Z',
+      createdAt: '2025-02-22T17:00:00.000Z',
     },
     {
       id: 'appr-002',
       experimentId: exp2Id,
       experimentTitle: 'Validation of Cryopreservation Protocol for T-Cell Viability at -196°C Liquid Nitrogen',
-      experimentNumber: 'EXP-2026-0038',
+      experimentNumber: 'EXP-2025-0038',
       versionId: 'ver-cart-001',
       versionNumber: '2.0',
       requesterId: 'usr-marcus',
@@ -635,28 +655,28 @@ export async function seedDatabase() {
       signatureDigest: sigDigest,
       comments: 'Full compliance verified. All raw data audit logs reconciled. Batch FORM-CRYO-101 released for clinical phase.',
       signedAt: signedTimestamp,
-      createdAt: '2026-02-14T15:00:00.000Z',
+      createdAt: '2025-02-14T15:00:00.000Z',
     },
   ];
 
   const auditLogs: AuditLog[] = [
     {
       id: 'aud-001',
-      timestamp: '2026-02-14T11:00:00.000Z',
+      timestamp: '2025-02-14T11:00:00.000Z',
       userId: 'usr-marcus',
       userName: 'Dr. Thameem',
       userRole: 'reviewer',
       action: 'VERSION_COMMIT',
       entityType: 'experiment',
       entityId: exp2Id,
-      details: 'Committed Version 2.0 of EXP-2026-0038 with SHA-256 hash ' + exp2Hash.substring(0, 12) + '...',
+      details: 'Committed Version 2.0 of EXP-2025-0038 with SHA-256 hash ' + exp2Hash.substring(0, 12) + '...',
       checksum: computeAuditChecksum({
         id: 'aud-001',
-        timestamp: '2026-02-14T11:00:00.000Z',
+        timestamp: '2025-02-14T11:00:00.000Z',
         userId: 'usr-marcus',
         action: 'VERSION_COMMIT',
         entityId: exp2Id,
-        details: 'Committed Version 2.0 of EXP-2026-0038 with SHA-256 hash ' + exp2Hash.substring(0, 12) + '...',
+        details: 'Committed Version 2.0 of EXP-2025-0038 with SHA-256 hash ' + exp2Hash.substring(0, 12) + '...',
       }),
     },
     {
@@ -668,33 +688,33 @@ export async function seedDatabase() {
       action: 'E_SIGNATURE',
       entityType: 'approval',
       entityId: 'appr-002',
-      details: '21 CFR Part 11 Electronic Signature executed with reason: Quality Assurance Release. Digest: ' + sigDigest.substring(0, 12) + '...',
+      details: 'Electronic Signature executed with reason: Quality Assurance Release. Digest: ' + sigDigest.substring(0, 12) + '...',
       checksum: computeAuditChecksum({
         id: 'aud-002',
         timestamp: signedTimestamp,
         userId: 'usr-sarah',
         action: 'E_SIGNATURE',
         entityId: 'appr-002',
-        details: '21 CFR Part 11 Electronic Signature executed with reason: Quality Assurance Release. Digest: ' + sigDigest.substring(0, 12) + '...',
+        details: 'Electronic Signature executed with reason: Quality Assurance Release. Digest: ' + sigDigest.substring(0, 12) + '...',
       }),
     },
     {
       id: 'aud-003',
-      timestamp: '2026-02-22T17:00:00.000Z',
+      timestamp: '2025-02-22T17:00:00.000Z',
       userId: 'usr-elena',
       userName: 'Dr. Kamalesh',
       userRole: 'researcher',
       action: 'UPDATE',
       entityType: 'approval',
       entityId: 'appr-001',
-      details: 'Submitted experiment EXP-2026-0042 (v1.1) to Dr. Thameem for peer review sign-off.',
+      details: 'Submitted experiment EXP-2025-0042 (v1.1) to Dr. Thameem for peer review sign-off.',
       checksum: computeAuditChecksum({
         id: 'aud-003',
-        timestamp: '2026-02-22T17:00:00.000Z',
+        timestamp: '2025-02-22T17:00:00.000Z',
         userId: 'usr-elena',
         action: 'UPDATE',
         entityId: 'appr-001',
-        details: 'Submitted experiment EXP-2026-0042 (v1.1) to Dr. Thameem for peer review sign-off.',
+        details: 'Submitted experiment EXP-2025-0042 (v1.1) to Dr. Thameem for peer review sign-off.',
       }),
     },
   ];
@@ -709,5 +729,10 @@ export async function seedDatabase() {
   dbManager.db.auditLogs = auditLogs;
 
   dbManager.saveLocalData();
-  console.log('✅ Seeding completed: Loaded users, projects, formulations, experiments, and 21 CFR Part 11 records.');
+  if (dbManager.isMongo) {
+    await dbManager.syncStateToMongo();
+    console.log('✅ Seeding completed: Populated MongoDB 7.0 collections and local cache.');
+  } else {
+    console.log('✅ Seeding completed: Loaded users, projects, formulations, and notebook experiments.');
+  }
 }

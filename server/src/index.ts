@@ -3,12 +3,25 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
 import { dbManager } from './config/db';
 import { seedDatabase } from './models/seed';
 import apiRouter from './routes/api';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Security HTTP Headers
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false,
+  })
+);
+
+// High-performance response compression (gzip/brotli)
+app.use(compression());
 
 // CORS configuration
 app.use(
@@ -26,7 +39,9 @@ app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     service: 'BioScribe ELN API',
+    stack: 'MERN (MongoDB, Express, React, Node.js)',
     time: new Date().toISOString(),
+    mongoActive: dbManager.isMongo,
     postgresActive: dbManager.isPostgres,
   });
 });
@@ -51,7 +66,8 @@ async function startServer() {
     await seedDatabase();
 
     app.listen(PORT, () => {
-      console.log(`🚀 BioScribe ELN Server running on http://localhost:${PORT}`);
+      console.log(`🚀 BioScribe ELN Server (MERN Stack: MongoDB + Express + React + Node.js) running on http://localhost:${PORT}`);
+      console.log(`🍃 Database: ${dbManager.isMongo ? 'MongoDB 7.0 Active (Mongoose ODM)' : 'Resilient Local Data Store (MongoDB Offline Mode)'}`);
       console.log(`🧬 Electronic Laboratory Notebook REST API ready at http://localhost:${PORT}/api`);
     });
   } catch (err) {

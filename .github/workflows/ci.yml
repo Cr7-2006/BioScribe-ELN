@@ -8,8 +8,15 @@ on:
 
 jobs:
   server-ci:
-    name: Backend Server Build & Verification
+    name: Backend Server Build & Verification (MERN Stack)
     runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+    env:
+      MONGODB_URI: mongodb://localhost:27017/bioscribe_eln_ci
     defaults:
       run:
         working-directory: ./server

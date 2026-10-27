@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -9,8 +9,18 @@ import {
   Observation,
   Formulation,
   Approval,
-  AuditLog
+  AuditLog,
 } from '../types';
+import {
+  UserModel,
+  ProjectModel,
+  ExperimentModel,
+  ExperimentVersionModel,
+  ObservationModel,
+  FormulationModel,
+  ApprovalModel,
+  AuditLogModel,
+} from '../models';
 
 export interface DatabaseState {
   users: User[];
@@ -24,8 +34,7 @@ export interface DatabaseState {
 }
 
 class DatabaseManager {
-  private pgPool: Pool | null = null;
-  private isPostgresActive = false;
+  private isMongoConnected = false;
   private localDataPath: string;
   private state: DatabaseState = {
     users: [],
@@ -35,7 +44,7 @@ class DatabaseManager {
     observations: [],
     formulations: [],
     approvals: [],
-    auditLogs: []
+    auditLogs: [],
   };
 
   constructor() {
@@ -66,181 +75,135 @@ class DatabaseManager {
   public saveLocalData() {
     try {
       fs.writeFileSync(this.localDataPath, JSON.stringify(this.state, null, 2), 'utf8');
+      // If MongoDB is connected, also mirror state to MongoDB in background
+      if (this.isMongoConnected) {
+        this.syncStateToMongo().catch((e) => {
+          console.error('Background MongoDB sync error:', e);
+        });
+      }
     } catch (err) {
       console.error('Failed to write local database file:', err);
     }
   }
 
   async init(): Promise<void> {
-    const dbUrl = process.env.DATABASE_URL;
-    if (dbUrl) {
-      try {
-        this.pgPool = new Pool({
-          connectionString: dbUrl,
-          connectionTimeoutMillis: 3000,
-        });
-
-        const client = await this.pgPool.connect();
-        await client.query('SELECT NOW()');
-        client.release();
-
-        this.isPostgresActive = true;
-        console.log('✅ Connected to PostgreSQL database successfully');
-        await this.runPgMigrations();
-        return;
-      } catch (err) {
-        console.log('⚠️ PostgreSQL connection failed, switching to Resilient Local Data Store');
-        this.isPostgresActive = false;
-      }
-    } else {
-      console.log('ℹ️ No DATABASE_URL specified. Running with Resilient Local Data Store');
-    }
-  }
-
-  private async runPgMigrations() {
-    if (!this.pgPool) return;
-    const migrationSql = `
-      CREATE TABLE IF NOT EXISTS users (
-        id VARCHAR(64) PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        role VARCHAR(32) NOT NULL,
-        department VARCHAR(255) NOT NULL,
-        password_hash TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS projects (
-        id VARCHAR(64) PRIMARY KEY,
-        code VARCHAR(32) UNIQUE NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        therapeutic_area VARCHAR(128),
-        lead_id VARCHAR(64),
-        lead_name VARCHAR(255),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS experiments (
-        id VARCHAR(64) PRIMARY KEY,
-        project_code VARCHAR(32) NOT NULL,
-        experiment_number VARCHAR(64) UNIQUE NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        objective TEXT,
-        hypothesis TEXT,
-        status VARCHAR(32) NOT NULL,
-        current_version_id VARCHAR(64),
-        current_version_number VARCHAR(32),
-        author_id VARCHAR(64) NOT NULL,
-        author_name VARCHAR(255) NOT NULL,
-        formulation_id VARCHAR(64),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS experiment_versions (
-        id VARCHAR(64) PRIMARY KEY,
-        experiment_id VARCHAR(64) REFERENCES experiments(id) ON DELETE CASCADE,
-        version_number VARCHAR(32) NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        objective TEXT,
-        hypothesis TEXT,
-        protocol_steps JSONB NOT NULL DEFAULT '[]',
-        conclusion TEXT,
-        author_id VARCHAR(64) NOT NULL,
-        author_name VARCHAR(255) NOT NULL,
-        change_summary TEXT NOT NULL,
-        hash_sha256 VARCHAR(64) NOT NULL,
-        is_locked BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS observations (
-        id VARCHAR(64) PRIMARY KEY,
-        experiment_id VARCHAR(64) REFERENCES experiments(id) ON DELETE CASCADE,
-        timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        recorded_by_id VARCHAR(64) NOT NULL,
-        recorded_by_name VARCHAR(255) NOT NULL,
-        category VARCHAR(64) NOT NULL,
-        parameter VARCHAR(128) NOT NULL,
-        value TEXT NOT NULL,
-        unit VARCHAR(32),
-        status VARCHAR(32) DEFAULT 'normal',
-        notes TEXT,
-        raw_data_json JSONB,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS formulations (
-        id VARCHAR(64) PRIMARY KEY,
-        code VARCHAR(32) UNIQUE NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        target_batch_size NUMERIC NOT NULL,
-        batch_unit VARCHAR(16) NOT NULL,
-        theoretical_yield_percentage NUMERIC DEFAULT 100,
-        actual_yield_percentage NUMERIC,
-        author_id VARCHAR(64) NOT NULL,
-        author_name VARCHAR(255) NOT NULL,
-        ingredients JSONB NOT NULL DEFAULT '[]',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS approvals (
-        id VARCHAR(64) PRIMARY KEY,
-        experiment_id VARCHAR(64) REFERENCES experiments(id) ON DELETE CASCADE,
-        experiment_title VARCHAR(255) NOT NULL,
-        experiment_number VARCHAR(64) NOT NULL,
-        version_id VARCHAR(64) NOT NULL,
-        version_number VARCHAR(32) NOT NULL,
-        requester_id VARCHAR(64) NOT NULL,
-        requester_name VARCHAR(255) NOT NULL,
-        reviewer_id VARCHAR(64),
-        reviewer_name VARCHAR(255),
-        role VARCHAR(64) NOT NULL,
-        status VARCHAR(32) NOT NULL,
-        signature_reason TEXT NOT NULL,
-        signature_digest VARCHAR(64),
-        comments TEXT,
-        signed_at TIMESTAMP WITH TIME ZONE,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-
-      CREATE TABLE IF NOT EXISTS audit_logs (
-        id VARCHAR(64) PRIMARY KEY,
-        timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        user_id VARCHAR(64) NOT NULL,
-        user_name VARCHAR(255) NOT NULL,
-        user_role VARCHAR(32) NOT NULL,
-        action VARCHAR(64) NOT NULL,
-        entity_type VARCHAR(64) NOT NULL,
-        entity_id VARCHAR(64) NOT NULL,
-        details TEXT NOT NULL,
-        metadata JSONB,
-        checksum VARCHAR(64) NOT NULL
-      );
-    `;
+    const mongoUri =
+      process.env.MONGODB_URI ||
+      process.env.MONGO_URL ||
+      'mongodb://127.0.0.1:27017/bioscribe_eln';
 
     try {
-      await this.pgPool.query(migrationSql);
-      console.log('✅ PostgreSQL migrations executed successfully');
-    } catch (e) {
-      console.error('PostgreSQL migration error:', e);
+      console.log(`🔌 Attempting connection to MongoDB at: ${mongoUri.replace(/:([^:@]+)@/, ':****@')}`);
+      await mongoose.connect(mongoUri, {
+        serverSelectionTimeoutMS: 3000,
+        connectTimeoutMS: 3000,
+      });
+
+      this.isMongoConnected = true;
+      console.log('✅ Connected to MongoDB database successfully (MERN Stack: MongoDB 7.0 + Mongoose)');
+
+      // Synchronize database records between MongoDB and memory state
+      await this.syncWithMongoOnStartup();
+    } catch (err: any) {
+      this.isMongoConnected = false;
+      console.log('⚠️ MongoDB connection could not be established:', err.message || err);
+      console.log('🔄 Running in Resilient Local Store Mode (Full offline MERN compatibility)');
     }
   }
 
-  // State accessor
+  private async syncWithMongoOnStartup() {
+    if (!this.isMongoConnected) return;
+
+    try {
+      const userCount = await UserModel.countDocuments();
+      if (userCount > 0) {
+        // MongoDB has records; populate in-memory state from MongoDB collections
+        console.log(`📦 Loading initial state from MongoDB (${userCount} users found)...`);
+        await this.syncMongoToState();
+      } else if (this.state.users && this.state.users.length > 0) {
+        // MongoDB is brand new; migrate pre-existing local data into MongoDB
+        console.log('📤 Migrating pre-existing local dataset into MongoDB collections...');
+        await this.syncStateToMongo();
+      }
+    } catch (error) {
+      console.error('Error during startup MongoDB state synchronization:', error);
+    }
+  }
+
+  public async syncMongoToState(): Promise<void> {
+    if (!this.isMongoConnected) return;
+
+    const [users, projects, experiments, experimentVersions, observations, formulations, approvals, auditLogs] =
+      await Promise.all([
+        UserModel.find().lean(),
+        ProjectModel.find().lean(),
+        ExperimentModel.find().lean(),
+        ExperimentVersionModel.find().lean(),
+        ObservationModel.find().lean(),
+        FormulationModel.find().lean(),
+        ApprovalModel.find().lean(),
+        AuditLogModel.find().lean(),
+      ]);
+
+    this.state.users = (users as any[]).map(this.cleanDoc);
+    this.state.projects = (projects as any[]).map(this.cleanDoc);
+    this.state.experiments = (experiments as any[]).map(this.cleanDoc);
+    this.state.experimentVersions = (experimentVersions as any[]).map(this.cleanDoc);
+    this.state.observations = (observations as any[]).map(this.cleanDoc);
+    this.state.formulations = (formulations as any[]).map(this.cleanDoc);
+    this.state.approvals = (approvals as any[]).map(this.cleanDoc);
+    this.state.auditLogs = (auditLogs as any[]).map(this.cleanDoc);
+  }
+
+  public async syncStateToMongo(): Promise<void> {
+    if (!this.isMongoConnected) return;
+
+    try {
+      const ops = [
+        ...this.state.users.map((u) => UserModel.updateOne({ id: u.id }, { $set: u }, { upsert: true })),
+        ...this.state.projects.map((p) => ProjectModel.updateOne({ id: p.id }, { $set: p }, { upsert: true })),
+        ...this.state.experiments.map((e) => ExperimentModel.updateOne({ id: e.id }, { $set: e }, { upsert: true })),
+        ...this.state.experimentVersions.map((v) =>
+          ExperimentVersionModel.updateOne({ id: v.id }, { $set: v }, { upsert: true })
+        ),
+        ...this.state.observations.map((o) =>
+          ObservationModel.updateOne({ id: o.id }, { $set: o }, { upsert: true })
+        ),
+        ...this.state.formulations.map((f) =>
+          FormulationModel.updateOne({ id: f.id }, { $set: f }, { upsert: true })
+        ),
+        ...this.state.approvals.map((a) => ApprovalModel.updateOne({ id: a.id }, { $set: a }, { upsert: true })),
+        ...this.state.auditLogs.map((l) => AuditLogModel.updateOne({ id: l.id }, { $set: l }, { upsert: true })),
+      ];
+
+      await Promise.all(ops);
+    } catch (err) {
+      console.error('Failed to sync state to MongoDB:', err);
+    }
+  }
+
+  private cleanDoc(doc: any): any {
+    if (!doc) return doc;
+    const { _id, __v, ...rest } = doc;
+    return rest;
+  }
+
+  // Accessors
   get db(): DatabaseState {
     return this.state;
   }
 
-  get isPostgres(): boolean {
-    return this.isPostgresActive;
+  get isMongo(): boolean {
+    return this.isMongoConnected;
   }
 
-  get pool(): Pool | null {
-    return this.pgPool;
+  get isPostgres(): boolean {
+    // Kept as backward compatibility getter
+    return false;
+  }
+
+  get mongoose() {
+    return mongoose;
   }
 }
 

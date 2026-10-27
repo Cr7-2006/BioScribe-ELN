@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   switchUser: (role: UserRole) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -35,17 +35,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch {
           logout();
         }
-      } else {
-        // Auto-login as Kamalesh (Lead Researcher) for immediate zero-friction demo experience
-        try {
-          await login('kamalesh@bioscribe.io', 'Password123!');
-        } catch {
-          try {
-            await login('elena.vance@bioscribe.io', 'Password123!');
-          } catch {
-            // Ignore
-          }
-        }
       }
       setIsLoading(false);
     };
@@ -62,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const login = async (email: string, password = 'Password123!') => {
+  const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
       const data = await apiRequest<{ token: string; user: User }>('/auth/login', {
@@ -79,13 +68,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const switchUser = async (role: UserRole) => {
-    let email = 'kamalesh@bioscribe.io';
-    if (role === 'reviewer') email = 'thameem@bioscribe.io';
-    if (role === 'qa_manager') email = 'subbu@bioscribe.io';
-    if (role === 'admin') email = 'admin@bioscribe.io';
-
-    await login(email, 'Password123!');
+  const switchUser = async (_role: UserRole) => {
+    // Disabled in favor of explicit user login
+    logout();
   };
 
   const logout = () => {

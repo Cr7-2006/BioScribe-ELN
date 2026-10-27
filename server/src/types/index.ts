@@ -1,11 +1,17 @@
 export type UserRole = 'researcher' | 'reviewer' | 'qa_manager' | 'admin';
+export type UserStatus = 'active' | 'pending_approval' | 'rejected' | 'deactivated';
 
 export interface User {
   id: string;
   name: string;
   email: string;
+  username?: string;
   role: UserRole;
   department: string;
+  status?: UserStatus;
+  justification?: string;
+  approvedAt?: string;
+  approvedBy?: string;
   passwordHash?: string;
   createdAt: string;
 }
@@ -124,7 +130,7 @@ export interface Approval {
   reviewerName?: string;
   role: ApprovalRole;
   status: ApprovalStatus;
-  signatureReason: string; // e.g., "I approve this data for formal release as per 21 CFR Part 11"
+  signatureReason: string; // e.g., "I approve this data for formal laboratory release"
   signatureDigest?: string; // Cryptographic hash
   comments?: string;
   signedAt?: string;

@@ -32,7 +32,12 @@ import {
   Sparkles,
   ChevronRight,
   ExternalLink,
+  FileSpreadsheet,
 } from 'lucide-react';
+import { ObservationTrendChart } from '../components/experiments/ObservationTrendChart';
+import { ObservationCsvImporter } from '../components/experiments/ObservationCsvImporter';
+import { formatDisplayDate, formatDisplayDateTime, formatDisplayTime } from '../utils/date';
+import { exportCertifiedExperimentPdf } from '../utils/pdfExport';
 
 interface ExperimentDetailProps {
   experimentId: string;
@@ -84,8 +89,10 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
 
   // Submit for Approval Modal
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [approvalRole, setApprovalRole] = useState<'peer_review' | 'qa_compliance'>('peer_review');
   const [approvalReason, setApprovalReason] = useState('');
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const fetchExperiment = async () => {
     try {
@@ -150,6 +157,26 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
     setCopiedHash(true);
     setTimeout(() => setCopiedHash(false), 2000);
     info('Copied to Clipboard', 'SHA-256 integrity hash copied.');
+  };
+
+  const handleExportPdf = async () => {
+    if (!experiment || !currentVersion) return;
+    try {
+      setIsExportingPdf(true);
+      await exportCertifiedExperimentPdf({
+        experiment,
+        currentVersion,
+        observations,
+        formulation,
+        approvals,
+        userName: user?.name || 'Authorized Researcher',
+      });
+      success('Certified PDF Exported', 'Tamper-proof run sheet downloaded successfully.');
+    } catch (err: any) {
+      error('Export Error', err.message || 'Failed to generate certified PDF report.');
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   const handleCommitRevision = async (e: React.FormEvent) => {
@@ -265,42 +292,42 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
   return (
     <div className="p-8 space-y-6 max-w-7xl mx-auto">
       {/* Top Breadcrumb & Actions Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
         <div className="flex items-center space-x-3">
           <button
             onClick={onBack}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition"
+            className="p-2 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 dark:hover:bg-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition shadow-sm"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-mono text-sm font-bold text-brand-400">
+              <span className="font-mono text-sm font-bold text-brand-600 dark:text-brand-400">
                 {experiment.experimentNumber}
               </span>
-              <span className="text-xs text-slate-500">•</span>
-              <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold">
+              <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700">
                 Version {experiment.currentVersionNumber}
               </span>
               <span
                 className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border capitalize ${
                   isApproved
-                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30'
                     : experiment.status === 'in_review'
-                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                    : 'bg-slate-800 text-slate-300 border-slate-700'
+                    ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30'
+                    : 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
                 }`}
               >
                 {experiment.status.replace('_', ' ')}
               </span>
               {isApproved && (
-                <span className="flex items-center space-x-1 text-[11px] text-emerald-400 font-medium bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/20">
+                <span className="flex items-center space-x-1 text-[11px] text-emerald-700 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20">
                   <Lock className="w-3 h-3" />
-                  <span>Locked (21 CFR Part 11)</span>
+                  <span>Locked & Verified</span>
                 </span>
               )}
             </div>
-            <h1 className="text-xl font-bold text-white mt-1">{experiment.title}</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white mt-1">{experiment.title}</h1>
           </div>
         </div>
 
@@ -310,9 +337,9 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
             <>
               <button
                 onClick={() => setIsCommitModalOpen(true)}
-                className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition"
+                className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold border border-slate-300 dark:border-slate-700 transition shadow-sm"
               >
-                <GitCommit className="w-3.5 h-3.5 text-brand-400" />
+                <GitCommit className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
                 <span>Commit Revision</span>
               </button>
               <button
@@ -327,29 +354,67 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
 
           <button
             onClick={() => setActiveTab('report')}
-            className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium border border-slate-800 transition"
+            className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium border border-slate-300 dark:border-slate-800 transition shadow-sm"
           >
-            <Printer className="w-3.5 h-3.5 text-slate-400" />
+            <Printer className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
             <span>Export Report</span>
+          </button>
+
+          <button
+            onClick={handleExportPdf}
+            disabled={isExportingPdf}
+            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-brand-600 dark:hover:bg-brand-500 text-xs font-semibold transition shadow-sm disabled:opacity-50"
+            title="Download Official Certified Run Sheet PDF"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-brand-400 dark:text-brand-200" />
+            <span>{isExportingPdf ? 'Exporting...' : 'Certified PDF'}</span>
           </button>
         </div>
       </div>
 
+      {/* Workflow Guidance Banner for New Users */}
+      <div className={`p-4 rounded-2xl border text-xs flex items-center justify-between gap-3 ${
+        isApproved
+          ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-500/40 text-emerald-900 dark:text-emerald-200'
+          : experiment.status === 'in_review'
+          ? 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-200'
+          : 'bg-brand-50/80 dark:bg-brand-950/30 border-brand-200 dark:border-brand-500/30 text-slate-800 dark:text-slate-200'
+      }`}>
+        <div className="flex items-center space-x-2.5">
+          <Sparkles className="w-4 h-4 flex-shrink-0 text-brand-600 dark:text-brand-400" />
+          <div>
+            {isApproved ? (
+              <span>
+                <strong>Record Certified & Permanently Sealed:</strong> This protocol is approved and certified. You can inspect version diffs or print an official laboratory report.
+              </span>
+            ) : experiment.status === 'in_review' ? (
+              <span>
+                <strong>Record Sent for Review:</strong> This notebook experiment has been submitted and sent to the designated Reviewer (Dr. Thameem) and QA Manager (Dr. Subbu) for formal electronic review and release.
+              </span>
+            ) : (
+              <span>
+                <strong>Draft Protocol Active:</strong> You can edit steps, add raw measurements in the "Observations" tab, or click "Submit for Sign-off" when complete.
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Cryptographic SHA-256 Checksum Strip */}
-      <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+      <div className="p-3 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shadow-sm">
         <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-4 h-4 text-brand-400 flex-shrink-0" />
-          <span className="text-slate-400">SHA-256 Cryptographic Hash:</span>
-          <code className="font-mono text-brand-300 bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[11px]">
+          <ShieldCheck className="w-4 h-4 text-brand-600 dark:text-brand-400 flex-shrink-0" />
+          <span className="text-slate-600 dark:text-slate-400">SHA-256 Cryptographic Hash:</span>
+          <code className="font-mono text-brand-700 dark:text-brand-300 bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 text-[11px]">
             {currentVersion.hashSha256}
           </code>
         </div>
         <button
           onClick={() => copyHash(currentVersion.hashSha256)}
-          className="flex items-center space-x-1 text-[11px] text-slate-400 hover:text-white transition"
+          className="flex items-center space-x-1 text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
         >
           {copiedHash ? (
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
+            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           ) : (
             <Copy className="w-3.5 h-3.5" />
           )}
@@ -358,7 +423,7 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800">
+      <div className="flex items-center space-x-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto">
         {[
           { id: 'protocol', label: 'Notebook Protocol', icon: BookOpen },
           {
@@ -373,10 +438,10 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
           },
           {
             id: 'approvals',
-            label: `Signatures & 21 CFR Part 11 (${approvals.length})`,
+            label: `Signatures & Approvals (${approvals.length})`,
             icon: FileCheck2,
           },
-          { id: 'report', label: 'Official GLP Report', icon: FileText },
+          { id: 'report', label: 'Official Lab Report', icon: FileText },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -384,10 +449,10 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center space-x-2 py-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+              className={`flex items-center space-x-2 py-3 px-4 text-xs font-semibold border-b-2 transition-all whitespace-nowrap ${
                 isActive
-                  ? 'border-brand-500 text-brand-300 bg-brand-500/5'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
+                  ? 'border-brand-500 text-brand-600 dark:text-brand-300 bg-brand-50/50 dark:bg-brand-500/5'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -403,21 +468,21 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
           {/* Main Protocol Column (2 Cols) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Objective & Hypothesis */}
-            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4 shadow-sm">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-brand-400">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-brand-600 dark:text-brand-400">
                   Scientific Objective
                 </h3>
-                <p className="text-sm text-slate-200 mt-1.5 leading-relaxed">
+                <p className="text-sm text-slate-700 dark:text-slate-200 mt-1.5 leading-relaxed">
                   {currentVersion.objective || 'No objective documented.'}
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-slate-800/80">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                   Hypothesis
                 </h3>
-                <p className="text-sm text-slate-200 mt-1.5 leading-relaxed">
+                <p className="text-sm text-slate-700 dark:text-slate-200 mt-1.5 leading-relaxed">
                   {currentVersion.hypothesis || 'No hypothesis documented.'}
                 </p>
               </div>
@@ -426,8 +491,8 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
             {/* Protocol Steps */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                  <BookOpen className="w-4 h-4 text-brand-400" />
+                <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                  <BookOpen className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                   <span>Sequential Experimental Protocol ({currentVersion.protocolSteps.length} Steps)</span>
                 </h2>
               </div>
@@ -436,42 +501,42 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                 {currentVersion.protocolSteps.map((step, idx) => (
                   <div
                     key={step.id || idx}
-                    className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition space-y-2"
+                    className="p-4 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 hover:border-brand-500/30 dark:hover:border-slate-700 transition space-y-2 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center space-x-3">
-                        <span className="w-7 h-7 rounded-lg bg-brand-500/10 border border-brand-500/30 text-brand-300 font-mono text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        <span className="w-7 h-7 rounded-lg bg-brand-50 dark:bg-brand-500/10 border border-brand-200 dark:border-brand-500/30 text-brand-700 dark:text-brand-300 font-mono text-xs font-bold flex items-center justify-center flex-shrink-0">
                           {step.stepNumber}
                         </span>
-                        <h4 className="text-sm font-semibold text-white">{step.title}</h4>
+                        <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{step.title}</h4>
                       </div>
 
                       <div className="flex items-center space-x-2 text-[11px] flex-shrink-0">
                         {step.criticalQualityAttribute && (
-                          <span className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/30 font-semibold">
+                          <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/30 font-semibold">
                             CQA Critical
                           </span>
                         )}
                         {step.temperatureCelsius !== undefined && (
-                          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-mono border border-slate-200 dark:border-slate-700">
                             {step.temperatureCelsius}°C
                           </span>
                         )}
                         {step.durationMinutes !== undefined && (
-                          <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 font-mono border border-slate-200 dark:border-slate-700">
                             {step.durationMinutes} min
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <p className="text-xs text-slate-300 pl-10 leading-relaxed">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 pl-10 leading-relaxed">
                       {step.instruction}
                     </p>
 
                     {step.notes && (
-                      <div className="ml-10 mt-2 p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400">
-                        <strong className="text-slate-300">Operator Notes:</strong> {step.notes}
+                      <div className="ml-10 mt-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-600 dark:text-slate-400">
+                        <strong className="text-slate-800 dark:text-slate-300">Operator Notes:</strong> {step.notes}
                       </div>
                     )}
                   </div>
@@ -481,11 +546,11 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
 
             {/* Results & Conclusion */}
             {currentVersion.conclusion && (
-              <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 shadow-sm">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Experimental Findings & Conclusion
                 </h3>
-                <p className="text-sm text-slate-200 leading-relaxed">
+                <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">
                   {currentVersion.conclusion}
                 </p>
               </div>
@@ -496,34 +561,34 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
           <div className="space-y-6">
             {/* Formulation Card */}
             {formulation ? (
-              <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                     Linked Formulation
                   </span>
-                  <span className="text-xs font-mono font-bold text-brand-400">
+                  <span className="text-xs font-mono font-bold text-brand-600 dark:text-brand-400">
                     {formulation.code}
                   </span>
                 </div>
 
-                <h4 className="text-sm font-semibold text-white">{formulation.name}</h4>
-                <p className="text-xs text-slate-400">{formulation.description}</p>
+                <h4 className="text-sm font-semibold text-slate-900 dark:text-white">{formulation.name}</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{formulation.description}</p>
 
-                <div className="pt-2 border-t border-slate-800 text-xs text-slate-300 space-y-1">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Batch Volume:</span>
-                    <span className="font-mono">{formulation.targetBatchSize} {formulation.batchUnit}</span>
+                    <span className="text-slate-400 dark:text-slate-500">Batch Volume:</span>
+                    <span className="font-mono font-semibold">{formulation.targetBatchSize} {formulation.batchUnit}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Components:</span>
-                    <span className="font-mono">{formulation.ingredients.length} reagents</span>
+                    <span className="text-slate-400 dark:text-slate-500">Components:</span>
+                    <span className="font-mono font-semibold">{formulation.ingredients.length} reagents</span>
                   </div>
                 </div>
 
                 {onOpenFormulation && (
                   <button
                     onClick={() => onOpenFormulation(formulation.id)}
-                    className="w-full mt-2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition flex items-center justify-center space-x-1"
+                    className="w-full mt-2 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition flex items-center justify-center space-x-1 shadow-sm"
                   >
                     <span>View Stoichiometry & Scaling</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -531,36 +596,36 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                 )}
               </div>
             ) : (
-              <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 text-center text-xs text-slate-500 space-y-1">
+              <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 space-y-1 shadow-sm">
                 <p>No chemical formulation linked to this study.</p>
               </div>
             )}
 
             {/* Experiment Metadata */}
-            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3 text-xs text-slate-400">
-              <h3 className="font-semibold uppercase tracking-wider text-slate-300 text-xs">
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3 text-xs text-slate-600 dark:text-slate-400 shadow-sm">
+              <h3 className="font-semibold uppercase tracking-wider text-slate-800 dark:text-slate-300 text-xs">
                 Notebook Metadata
               </h3>
-              <div className="space-y-2 pt-1 divide-y divide-slate-800/60">
+              <div className="space-y-2 pt-1 divide-y divide-slate-100 dark:divide-slate-800/60">
                 <div className="flex justify-between pt-1">
                   <span>Lead Investigator:</span>
-                  <strong className="text-slate-200">{experiment.authorName}</strong>
+                  <strong className="text-slate-800 dark:text-slate-200">{experiment.authorName}</strong>
                 </div>
                 <div className="flex justify-between pt-2">
                   <span>Project Study:</span>
-                  <span className="font-mono text-brand-400">{experiment.projectCode}</span>
+                  <span className="font-mono font-semibold text-brand-600 dark:text-brand-400">{experiment.projectCode}</span>
                 </div>
                 <div className="flex justify-between pt-2">
                   <span>Registered:</span>
-                  <span>{new Date(experiment.createdAt).toLocaleString()}</span>
+                  <span>{formatDisplayDateTime(experiment.createdAt)}</span>
                 </div>
                 <div className="flex justify-between pt-2">
                   <span>Last Modified:</span>
-                  <span>{new Date(experiment.updatedAt).toLocaleString()}</span>
+                  <span>{formatDisplayDateTime(experiment.updatedAt)}</span>
                 </div>
                 <div className="flex justify-between pt-2">
-                  <span>Regulatory Status:</span>
-                  <span className="text-emerald-400 font-semibold">GLP Compliant</span>
+                  <span>Record Status:</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Verified Protocol</span>
                 </div>
               </div>
             </div>
@@ -572,44 +637,44 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
       {activeTab === 'versions' && (
         <div className="space-y-6">
           {/* Version Diff Inspector Controls */}
-          <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-                  <GitCompare className="w-4 h-4 text-brand-400" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                  <GitCompare className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                   <span>Version Revision Diff Inspector</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Compare protocol steps, objectives, and parameters between any two revisions.
                 </p>
               </div>
 
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2 text-xs">
-                  <span className="text-slate-400 font-medium">Base:</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Base:</span>
                   <select
                     value={diffV1Id}
                     onChange={(e) => setDiffV1Id(e.target.value)}
-                    className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 font-mono"
+                    className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 font-mono"
                   >
                     {versions.map((v) => (
                       <option key={v.id} value={v.id}>
-                        v{v.versionNumber} ({new Date(v.createdAt).toLocaleDateString()})
+                        v{v.versionNumber} ({formatDisplayDate(v.createdAt)})
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="flex items-center space-x-2 text-xs">
-                  <span className="text-slate-400 font-medium">Compare With:</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Compare With:</span>
                   <select
                     value={diffV2Id}
                     onChange={(e) => setDiffV2Id(e.target.value)}
-                    className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-200 font-mono"
+                    className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 font-mono"
                   >
                     {versions.map((v) => (
                       <option key={v.id} value={v.id}>
-                        v{v.versionNumber} ({new Date(v.createdAt).toLocaleDateString()})
+                        v{v.versionNumber} ({formatDisplayDate(v.createdAt)})
                       </option>
                     ))}
                   </select>
@@ -621,24 +686,24 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
             {diffLoading ? (
               <div className="py-8 text-center text-xs text-slate-500">Computing cryptographic diff...</div>
             ) : diffData ? (
-              <div className="space-y-4 pt-2 border-t border-slate-800">
+              <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
                 {/* Meta Diff info */}
                 <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
                     <span className="text-slate-500 block text-[10px] uppercase">Base Version</span>
-                    <div className="font-bold text-slate-200">v{diffData.v1.versionNumber} by {diffData.v1.authorName}</div>
-                    <div className="text-[10px] text-slate-400">SHA-256: {diffData.v1.hash.substring(0, 16)}...</div>
+                    <div className="font-bold text-slate-800 dark:text-slate-200">v{diffData.v1.versionNumber} by {diffData.v1.authorName}</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">SHA-256: {diffData.v1.hash.substring(0, 16)}...</div>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1">
                     <span className="text-slate-500 block text-[10px] uppercase">Compared Revision</span>
-                    <div className="font-bold text-brand-400">v{diffData.v2.versionNumber} by {diffData.v2.authorName}</div>
-                    <div className="text-[10px] text-slate-400">SHA-256: {diffData.v2.hash.substring(0, 16)}...</div>
+                    <div className="font-bold text-brand-600 dark:text-brand-400">v{diffData.v2.versionNumber} by {diffData.v2.authorName}</div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">SHA-256: {diffData.v2.hash.substring(0, 16)}...</div>
                   </div>
                 </div>
 
                 {/* Steps Diff List */}
                 <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Protocol Steps Comparison
                   </h4>
                   {diffData.stepsDiff?.map((d: any, idx: number) => {
@@ -651,29 +716,29 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                         key={idx}
                         className={`p-3 rounded-xl border text-xs space-y-1.5 ${
                           isAdded
-                            ? 'bg-emerald-950/20 border-emerald-500/40 text-emerald-200'
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-500/40 dark:text-emerald-200'
                             : isRemoved
-                            ? 'bg-rose-950/20 border-rose-500/40 text-rose-200'
+                            ? 'bg-rose-50 border-rose-300 text-rose-800 dark:bg-rose-950/20 dark:border-rose-500/40 dark:text-rose-200'
                             : isModified
-                            ? 'bg-amber-950/20 border-amber-500/40 text-amber-200'
-                            : 'bg-slate-950/40 border-slate-800 text-slate-300'
+                            ? 'bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/20 dark:border-amber-500/40 dark:text-amber-200'
+                            : 'bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
                         }`}
                       >
                         <div className="flex items-center justify-between font-mono">
                           <span className="font-bold">Step #{d.stepNumber}: {d.current?.title || d.previous?.title}</span>
-                          <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
+                          <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                             {d.status}
                           </span>
                         </div>
 
                         {isModified && (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] pt-1">
-                            <div className="p-2 rounded bg-rose-950/40 border border-rose-500/30 text-rose-300">
-                              <div className="text-[10px] text-rose-400 font-bold mb-0.5">Previous (v{diffData.v1.versionNumber}):</div>
+                            <div className="p-2 rounded bg-rose-100/70 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-500/30 text-rose-900 dark:text-rose-300">
+                              <div className="text-[10px] text-rose-700 dark:text-rose-400 font-bold mb-0.5">Previous (v{diffData.v1.versionNumber}):</div>
                               <div>{d.previous.instruction}</div>
                             </div>
-                            <div className="p-2 rounded bg-emerald-950/40 border border-emerald-500/30 text-emerald-300">
-                              <div className="text-[10px] text-emerald-400 font-bold mb-0.5">Modified (v{diffData.v2.versionNumber}):</div>
+                            <div className="p-2 rounded bg-emerald-100/70 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-300">
+                              <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold mb-0.5">Modified (v{diffData.v2.versionNumber}):</div>
                               <div>{d.current.instruction}</div>
                             </div>
                           </div>
@@ -694,37 +759,37 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
 
           {/* Version Commits Timeline */}
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-white flex items-center space-x-2">
-              <GitCommit className="w-4 h-4 text-brand-400" />
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <GitCommit className="w-4 h-4 text-brand-600 dark:text-brand-400" />
               <span>Full Revision Commit History</span>
             </h3>
 
-            <div className="divide-y divide-slate-800 border border-slate-800 rounded-2xl bg-slate-900/60 overflow-hidden">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/60 overflow-hidden shadow-sm">
               {versions.map((v) => (
-                <div key={v.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-800/30 transition">
+                <div key={v.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs font-bold text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-500/20">
+                      <span className="font-mono text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-2.5 py-0.5 rounded border border-brand-200 dark:border-brand-500/20">
                         Version {v.versionNumber}
                       </span>
-                      <span className="text-xs text-slate-400">by {v.authorName}</span>
-                      <span className="text-xs text-slate-500">•</span>
+                      <span className="text-xs text-slate-600 dark:text-slate-400">by {v.authorName}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
                       <span className="text-xs text-slate-500">
-                        {new Date(v.createdAt).toLocaleString()}
+                        {formatDisplayDateTime(v.createdAt)}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-300 font-medium">{v.changeSummary}</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">{v.changeSummary}</p>
                     <div className="flex items-center space-x-2 text-[11px] text-slate-500 font-mono">
                       <span>SHA-256: {v.hashSha256}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-2 flex-shrink-0">
-                    <span className="text-xs font-mono text-slate-400">
+                    <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                       {v.protocolSteps.length} Protocol Steps
                     </span>
                     {v.isLocked && (
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-mono border border-slate-700">
+                      <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-mono border border-slate-200 dark:border-slate-700">
                         Locked
                       </span>
                     )}
@@ -741,37 +806,50 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
-                <Activity className="w-4 h-4 text-brand-400" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Activity className="w-4 h-4 text-brand-600 dark:text-brand-400" />
                 <span>Laboratory Observations & Time-Series Data</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Structured telemetry, analytical assays, spectrometer readings, and environmental factors.
               </p>
             </div>
 
             {!isApproved && (
-              <button
-                onClick={() => setIsObsModalOpen(true)}
-                className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-slate-950 text-xs font-bold transition shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Log Observation</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setIsCsvModalOpen(true)}
+                  className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition border border-slate-200 dark:border-slate-700 shadow-sm"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
+                  <span>Bulk Import CSV</span>
+                </button>
+
+                <button
+                  onClick={() => setIsObsModalOpen(true)}
+                  className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-slate-950 text-xs font-bold transition shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Log Observation</span>
+                </button>
+              </div>
             )}
           </div>
 
+          {/* Interactive Scientific Trend Chart */}
+          <ObservationTrendChart observations={observations} />
+
           {/* Observations Table */}
           {observations.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800 text-slate-500 space-y-2">
-              <Activity className="w-8 h-8 mx-auto text-slate-600" />
+            <div className="p-12 text-center rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 text-slate-500 space-y-2 shadow-sm">
+              <Activity className="w-8 h-8 mx-auto text-slate-400 dark:text-slate-600" />
               <p className="text-xs">No observations recorded yet. Click "Log Observation" to add data.</p>
             </div>
           ) : (
-            <div className="border border-slate-800 rounded-2xl bg-slate-900/60 overflow-hidden shadow-sm">
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/60 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                  <thead className="bg-slate-50 dark:bg-slate-950/80 text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                     <tr>
                       <th className="py-3 px-4">Timestamp</th>
                       <th className="py-3 px-4">Category</th>
@@ -783,45 +861,45 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                       {!isApproved && <th className="py-3 px-4 text-right">Action</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/80">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
                     {observations.map((obs) => (
-                      <tr key={obs.id} className="hover:bg-slate-800/30 transition">
-                        <td className="py-3 px-4 font-mono text-[11px] text-slate-400">
-                          {new Date(obs.timestamp).toLocaleTimeString()} ({new Date(obs.timestamp).toLocaleDateString()})
+                      <tr key={obs.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition">
+                        <td className="py-3 px-4 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                          {formatDisplayDateTime(obs.timestamp)}
                         </td>
                         <td className="py-3 px-4">
-                          <span className="capitalize px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">
+                          <span className="capitalize px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[10px] border border-slate-200 dark:border-slate-700">
                             {obs.category}
                           </span>
                         </td>
-                        <td className="py-3 px-4 font-semibold text-white">
+                        <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">
                           {obs.parameter}
                         </td>
-                        <td className="py-3 px-4 font-mono font-bold text-brand-300">
+                        <td className="py-3 px-4 font-mono font-bold text-brand-700 dark:text-brand-300">
                           {obs.value} {obs.unit}
                         </td>
                         <td className="py-3 px-4">
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase ${
                               obs.status === 'normal'
-                                ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                                : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30'
+                                : 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/30'
                             }`}
                           >
                             {obs.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-slate-400 max-w-xs truncate">
+                        <td className="py-3 px-4 text-slate-500 dark:text-slate-400 max-w-xs truncate">
                           {obs.notes || '—'}
                         </td>
-                        <td className="py-3 px-4 text-slate-400">
+                        <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">
                           {obs.recordedByName}
                         </td>
                         {!isApproved && (
                           <td className="py-3 px-4 text-right">
                             <button
                               onClick={() => handleDeleteObservation(obs.id)}
-                              className="text-slate-500 hover:text-rose-400 p-1"
+                              className="text-slate-400 hover:text-rose-500 p-1 transition"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -837,31 +915,31 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
         </div>
       )}
 
-      {/* Tab 4: Approvals & 21 CFR Part 11 Electronic Signatures */}
+      {/* Tab 4: Approvals & Electronic Signatures */}
       {activeTab === 'approvals' && (
         <div className="space-y-6">
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-800 flex items-start space-x-4">
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex-shrink-0">
+          <div className="p-5 rounded-2xl bg-emerald-50/70 dark:bg-gradient-to-r dark:from-slate-900 dark:to-slate-950 border border-emerald-500/30 flex items-start space-x-4 shadow-sm">
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex-shrink-0">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">
-                FDA 21 CFR Part 11 Electronic Signatures & Approvals
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Electronic Signatures & Approvals
               </h3>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Signatures executed on this record are legally binding electronic records. Dual-factor authentication (password re-verification), explicit intent manifestation, and cryptographic digest hashing are enforced.
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                Signatures executed on this record are permanently recorded electronic signatures. Credential re-authentication, explicit intent confirmation, and cryptographic digest hashing are enforced.
               </p>
             </div>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Signature & Approval Registry ({approvals.length})
             </h4>
 
             {approvals.length === 0 ? (
-              <div className="p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800 text-slate-500">
-                <FileCheck2 className="w-8 h-8 mx-auto mb-2 text-slate-600" />
+              <div className="p-12 text-center rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 text-slate-500 shadow-sm">
+                <FileCheck2 className="w-8 h-8 mx-auto mb-2 text-slate-400 dark:text-slate-600" />
                 <p className="text-xs">No formal approval reviews requested yet.</p>
               </div>
             ) : (
@@ -869,47 +947,47 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                 {approvals.map((appr) => (
                   <div
                     key={appr.id}
-                    className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3"
+                    className="p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 space-y-3 shadow-sm"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center space-x-2">
-                        <span className="font-mono text-xs font-bold text-brand-400">
+                        <span className="font-mono text-xs font-bold text-brand-600 dark:text-brand-400">
                           {appr.experimentNumber}
                         </span>
-                        <span className="text-xs text-slate-400">Version {appr.versionNumber}</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Version {appr.versionNumber}</span>
                         <span
                           className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border capitalize ${
                             appr.status === 'approved'
-                              ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30'
                               : appr.status === 'pending'
-                              ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                              : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+                              ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/30'
+                              : 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/30'
                           }`}
                         >
                           {appr.status}
                         </span>
                       </div>
 
-                      <span className="text-xs text-slate-400 font-mono">
-                        Requested: {new Date(appr.createdAt).toLocaleDateString()}
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                        Requested: {formatDisplayDate(appr.createdAt)}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-300 space-y-1">
+                    <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1">
                       <p><strong>Intent / Reason:</strong> {appr.signatureReason}</p>
                       {appr.comments && <p><strong>Comments:</strong> {appr.comments}</p>}
                     </div>
 
                     {appr.status === 'approved' && appr.signatureDigest && (
-                      <div className="pt-2 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
-                        <div className="text-emerald-400">
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
+                        <div className="text-emerald-600 dark:text-emerald-400 font-medium">
                           Signed by: <strong>{appr.reviewerName}</strong> ({appr.role.replace('_', ' ')})
                         </div>
-                        <div className="text-slate-400 text-right sm:text-right">
-                          Timestamp: {new Date(appr.signedAt!).toUTCString()}
+                        <div className="text-slate-500 dark:text-slate-400 text-right sm:text-right">
+                          Timestamp: {formatDisplayDateTime(appr.signedAt)}
                         </div>
-                        <div className="sm:col-span-2 p-2 rounded bg-slate-950 border border-slate-800 text-[10px] text-slate-400 truncate">
-                          Electronic Signature Digest: <span className="text-brand-300">{appr.signatureDigest}</span>
+                        <div className="sm:col-span-2 p-2 rounded bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-[10px] text-slate-600 dark:text-slate-400 truncate">
+                          Electronic Signature Digest: <span className="text-brand-700 dark:text-brand-300 font-semibold">{appr.signatureDigest}</span>
                         </div>
                       </div>
                     )}
@@ -921,7 +999,7 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
         </div>
       )}
 
-      {/* Tab 5: Printable Official GLP Report */}
+      {/* Tab 5: Printable Official Lab Report */}
       {activeTab === 'report' && (
         <div className="p-8 rounded-2xl bg-white text-slate-900 space-y-6 shadow-2xl print:p-0">
           {/* Print Header */}
@@ -933,7 +1011,7 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-600 font-medium">
-                Official GLP Analytical Study Protocol & Data Archive
+                Official Laboratory Study Protocol & Data Archive
               </p>
             </div>
             <div className="text-right font-mono text-xs text-slate-700">
@@ -952,7 +1030,7 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               <div><strong>Title:</strong> {experiment.title}</div>
               <div><strong>Project Code:</strong> {experiment.projectCode}</div>
               <div><strong>Primary Investigator:</strong> {experiment.authorName}</div>
-              <div><strong>Registration Date:</strong> {new Date(experiment.createdAt).toLocaleDateString()}</div>
+              <div><strong>Registration Date:</strong> {formatDisplayDate(experiment.createdAt)}</div>
             </div>
             <div>
               <strong>Objective:</strong> {currentVersion.objective}
@@ -1012,7 +1090,7 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               <tbody className="divide-y divide-slate-200">
                 {observations.map((o) => (
                   <tr key={o.id}>
-                    <td className="p-2 font-mono">{new Date(o.timestamp).toLocaleTimeString()}</td>
+                    <td className="p-2 font-mono">{formatDisplayTime(o.timestamp)}</td>
                     <td className="p-2 font-semibold">{o.parameter}</td>
                     <td className="p-2 font-mono font-bold">{o.value} {o.unit}</td>
                     <td className="p-2 font-bold uppercase">{o.status}</td>
@@ -1026,7 +1104,7 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
           {/* Signature Block */}
           <div className="pt-4 border-t-2 border-slate-900 space-y-3 text-xs">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
-              4. FDA 21 CFR Part 11 Electronic Signature Attestation
+              4. Electronic Signature Attestation & Verification
             </h2>
             <div className="p-4 border border-slate-300 bg-slate-50 space-y-2">
               <div className="flex justify-between font-mono text-[11px]">
@@ -1043,13 +1121,21 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
             </div>
           </div>
 
-          <div className="flex justify-end pt-4 print:hidden">
+          <div className="flex justify-end items-center space-x-3 pt-4 print:hidden">
             <button
               onClick={() => window.print()}
-              className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 flex items-center space-x-2"
+              className="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs font-semibold flex items-center space-x-2 transition shadow-sm"
             >
               <Printer className="w-4 h-4" />
-              <span>Print / Save as PDF</span>
+              <span>Quick Print</span>
+            </button>
+            <button
+              onClick={handleExportPdf}
+              disabled={isExportingPdf}
+              className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 flex items-center space-x-2 shadow-sm transition disabled:opacity-50"
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>{isExportingPdf ? 'Generating Certified PDF...' : 'Download Certified PDF (SHA-256 Sealed)'}</span>
             </button>
           </div>
         </div>
@@ -1057,21 +1143,21 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
 
       {/* Commit Revision Modal */}
       {isCommitModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
-                <GitCommit className="w-5 h-5 text-brand-400" />
-                <h3 className="text-base font-bold text-white">Commit Protocol Revision</h3>
+                <GitCommit className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Commit Protocol Revision</h3>
               </div>
-              <button onClick={() => setIsCommitModalOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setIsCommitModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleCommitRevision} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Revision Increment Type
                 </label>
                 <div className="flex space-x-4">
@@ -1082,8 +1168,9 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                       value="minor"
                       checked={bumpType === 'minor'}
                       onChange={() => setBumpType('minor')}
+                      className="text-brand-600"
                     />
-                    <span className="text-slate-300">Minor Revision (e.g. v1.1 - parameter adjustments)</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">Minor Revision (e.g. v1.1 - parameter adjustments)</span>
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <input
@@ -1092,28 +1179,53 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                       value="major"
                       checked={bumpType === 'major'}
                       onChange={() => setBumpType('major')}
+                      className="text-brand-600"
                     />
-                    <span className="text-slate-300">Major Revision (e.g. v2.0 - structural change)</span>
+                    <span className="text-slate-700 dark:text-slate-300 font-medium">Major Revision (e.g. v2.0 - structural change)</span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
-                  Change Summary / Justification *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold">
+                    Change Summary / Justification *
+                  </label>
+                  <div className="flex space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBumpType('minor');
+                        setCommitSummary('Adjusted step incubation temperature to 37°C to optimize kinetic reaction rates.');
+                      }}
+                      className="text-[10px] text-brand-600 dark:text-brand-400 font-bold hover:underline"
+                    >
+                      ⚡ Sample: Temp Adjustment
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBumpType('minor');
+                        setCommitSummary('Appended dissociation wash cycle to eliminate non-specific surface binding.');
+                      }}
+                      className="text-[10px] text-brand-600 dark:text-brand-400 font-bold hover:underline"
+                    >
+                      ⚡ Sample: Wash Cycle
+                    </button>
+                  </div>
+                </div>
                 <textarea
                   rows={3}
                   placeholder="Detail the scientific justification for modifying the protocol steps or parameters..."
                   value={commitSummary}
                   onChange={(e) => setCommitSummary(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:border-brand-500 focus:outline-none resize-none"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs focus:border-brand-500 focus:outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">
                   Discussion / Results Conclusion
                 </label>
                 <textarea
@@ -1121,11 +1233,11 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                   placeholder="Summarize analytical findings and conclusions..."
                   value={editableConclusion}
                   onChange={(e) => setEditableConclusion(e.target.value)}
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs focus:border-brand-500 focus:outline-none resize-none"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs focus:border-brand-500 focus:outline-none resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-400">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                 A new SHA-256 fingerprint will be computed. Previous version snapshots remain permanently locked in history.
               </div>
 
@@ -1133,13 +1245,13 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsCommitModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold shadow-lg shadow-brand-500/20"
+                  className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold shadow-md shadow-brand-500/20"
                 >
                   Commit New Version
                 </button>
@@ -1151,26 +1263,78 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
 
       {/* Log Observation Modal */}
       {isObsModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
-                <Activity className="w-5 h-5 text-brand-400" />
-                <h3 className="text-base font-bold text-white">Log Analytical Observation</h3>
+                <Activity className="w-5 h-5 text-brand-600 dark:text-brand-400" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Log Analytical Observation</h3>
               </div>
-              <button onClick={() => setIsObsModalOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setIsObsModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
                 ✕
               </button>
+            </div>
+
+            {/* Quick Presets for Demo */}
+            <div className="p-3 rounded-xl bg-cyan-50/60 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800/50 space-y-1.5">
+              <span className="text-[11px] font-bold text-cyan-800 dark:text-cyan-300 flex items-center space-x-1">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>1-Click Sample Measurements</span>
+              </span>
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setObsCategory('spectroscopy');
+                    setObsParam('Dissociation Constant (KD)');
+                    setObsValue('4.85');
+                    setObsUnit('nM');
+                    setObsStatus('normal');
+                    setObsNotes('Equilibrium fit with 1:1 Langmuir binding model');
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-cyan-200 dark:border-cyan-800 text-[11px] font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-800 transition"
+                >
+                  ⚡ SPR KD (4.85 nM)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setObsCategory('measurement');
+                    setObsParam('Buffer Solution pH');
+                    setObsValue('7.40');
+                    setObsUnit('pH');
+                    setObsStatus('normal');
+                    setObsNotes('Calibrated with standard pH 4.0 and 7.0 buffer references');
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-cyan-200 dark:border-cyan-800 text-[11px] font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-800 transition"
+                >
+                  ⚡ Buffer pH (7.40)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setObsCategory('measurement');
+                    setObsParam('Optical Density (OD600)');
+                    setObsValue('0.85');
+                    setObsUnit('AU');
+                    setObsStatus('normal');
+                    setObsNotes('Mid-logarithmic bacterial cell growth phase');
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-cyan-200 dark:border-cyan-800 text-[11px] font-medium text-slate-700 dark:text-slate-200 hover:bg-cyan-50 dark:hover:bg-slate-800 transition"
+                >
+                  ⚡ Optical Density (0.85 AU)
+                </button>
+              </div>
             </div>
 
             <form onSubmit={handleAddObservation} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Category</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Category</label>
                   <select
                     value={obsCategory}
                     onChange={(e) => setObsCategory(e.target.value as any)}
-                    className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
+                    className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200"
                   >
                     <option value="measurement">General Measurement</option>
                     <option value="spectroscopy">Spectroscopy / SPR</option>
@@ -1180,11 +1344,11 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Status / Quality</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Status / Quality</label>
                   <select
                     value={obsStatus}
                     onChange={(e) => setObsStatus(e.target.value as any)}
-                    className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
+                    className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200"
                   >
                     <option value="normal">Normal / In Spec</option>
                     <option value="anomaly">Anomaly / Out of Spec</option>
@@ -1193,49 +1357,49 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Parameter Name *</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Parameter Name *</label>
                 <input
                   type="text"
                   placeholder="e.g. Absorbance (OD600) or Binding KD"
                   value={obsParam}
                   onChange={(e) => setObsParam(e.target.value)}
-                  className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
+                  className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Observed Value *</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Observed Value *</label>
                   <input
                     type="text"
                     placeholder="e.g. 8.42 or 94.2"
                     value={obsValue}
                     onChange={(e) => setObsValue(e.target.value)}
-                    className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
+                    className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Unit of Measure</label>
+                  <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Unit of Measure</label>
                   <input
                     type="text"
                     placeholder="e.g. nM, %, RU, °C"
                     value={obsUnit}
                     onChange={(e) => setObsUnit(e.target.value)}
-                    className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
+                    className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Operator Notes</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Operator Notes</label>
                 <textarea
                   rows={2}
                   placeholder="Optional experimental observations or remarks..."
                   value={obsNotes}
                   onChange={(e) => setObsNotes(e.target.value)}
-                  className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 resize-none"
+                  className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200 resize-none"
                 />
               </div>
 
@@ -1243,13 +1407,13 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsObsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold shadow-lg shadow-brand-500/20"
+                  className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-slate-950 font-bold shadow-md shadow-brand-500/20"
                 >
                   Save Data Point
                 </button>
@@ -1261,25 +1425,25 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
 
       {/* Submit for Approval Modal */}
       {isApprovalModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center space-x-2">
-                <FileCheck2 className="w-5 h-5 text-amber-400" />
-                <h3 className="text-base font-bold text-white">Submit for Regulatory Sign-off</h3>
+                <FileCheck2 className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Submit for Regulatory Sign-off</h3>
               </div>
-              <button onClick={() => setIsApprovalModalOpen(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setIsApprovalModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
                 ✕
               </button>
             </div>
 
             <form onSubmit={handleSubmitForApproval} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Required Review Role</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Required Review Role</label>
                 <select
                   value={approvalRole}
                   onChange={(e) => setApprovalRole(e.target.value as any)}
-                  className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
+                  className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200"
                 >
                   <option value="peer_review">Peer Review Verification (Dr. Thameem)</option>
                   <option value="qa_compliance">Quality Assurance & Release (Dr. Subbu)</option>
@@ -1287,32 +1451,32 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Signature Intent / Reason</label>
+                <label className="block text-slate-700 dark:text-slate-300 font-semibold mb-1">Signature Intent / Reason</label>
                 <input
                   type="text"
                   placeholder="e.g. Formal verification of SPR protocol and kinetic fitting"
                   value={approvalReason}
                   onChange={(e) => setApprovalReason(e.target.value)}
-                  className="w-full p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200"
+                  className="w-full p-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-800 dark:text-slate-200"
                   required
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-500/30 text-amber-200">
-                Submitting will move this experiment to <strong>In Review</strong> status. Once approved, the record is permanently locked from alterations under 21 CFR Part 11.
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-500/30 text-amber-800 dark:text-amber-200">
+                Submitting will move this experiment to <strong>In Review</strong> status. Once approved, the record is permanently locked from alterations.
               </div>
 
               <div className="flex justify-end space-x-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsApprovalModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/20"
+                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
                 >
                   Send Sign-off Request
                 </button>
@@ -1320,6 +1484,16 @@ export const ExperimentDetail: React.FC<ExperimentDetailProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* CSV Bulk Importer Modal */}
+      {experiment && (
+        <ObservationCsvImporter
+          experimentId={experiment.id}
+          isOpen={isCsvModalOpen}
+          onClose={() => setIsCsvModalOpen(false)}
+          onImportSuccess={fetchExperiment}
+        />
       )}
     </div>
   );

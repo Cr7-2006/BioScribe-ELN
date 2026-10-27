@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { dbManager } from '../config/db';
+import { AuditLogModel } from '../models';
 import { AuditLog, UserRole } from '../types';
 import { computeAuditChecksum } from './crypto';
 
@@ -13,7 +14,9 @@ export async function recordAuditLog(entry: {
   details: string;
   metadata?: Record<string, any>;
 }): Promise<AuditLog> {
-  const id = 'aud-' + (crypto.randomUUID ? crypto.randomUUID().substring(0, 8) : Math.random().toString(36).substring(2, 10));
+  const id =
+    'aud-' +
+    (crypto.randomUUID ? crypto.randomUUID().substring(0, 8) : Math.random().toString(36).substring(2, 10));
   const timestamp = new Date().toISOString();
 
   const checksum = computeAuditChecksum({
@@ -39,31 +42,16 @@ export async function recordAuditLog(entry: {
     checksum,
   };
 
-  if (dbManager.isPostgres && dbManager.pool) {
+  // Persist to MongoDB Audit Ledger when active
+  if (dbManager.isMongo) {
     try {
-      await dbManager.pool.query(
-        `INSERT INTO audit_logs (id, timestamp, user_id, user_name, user_role, action, entity_type, entity_id, details, metadata, checksum)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-        [
-          auditRecord.id,
-          auditRecord.timestamp,
-          auditRecord.userId,
-          auditRecord.userName,
-          auditRecord.userRole,
-          auditRecord.action,
-          auditRecord.entityType,
-          auditRecord.entityId,
-          auditRecord.details,
-          JSON.stringify(auditRecord.metadata || {}),
-          auditRecord.checksum,
-        ]
-      );
+      await AuditLogModel.create(auditRecord);
     } catch (err) {
-      console.error('Failed to insert audit log into Postgres:', err);
+      console.error('Failed to insert audit log into MongoDB:', err);
     }
   }
 
-  // Always keep local in-memory/JSON store up to date
+  // Always keep state up to date
   dbManager.db.auditLogs.unshift(auditRecord);
   dbManager.saveLocalData();
 
