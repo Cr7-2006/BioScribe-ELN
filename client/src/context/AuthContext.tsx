@@ -14,29 +14,59 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
+function getSafeSavedUser(): User | null {
+  try {
     const saved = localStorage.getItem('bioscribe_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('bioscribe_token');
-  });
+    if (!saved || saved === 'undefined' || saved === 'null') {
+      return null;
+    }
+    const parsed = JSON.parse(saved);
+    if (parsed && typeof parsed === 'object' && parsed.id) {
+      return parsed;
+    }
+    return null;
+  } catch {
+    localStorage.removeItem('bioscribe_user');
+    return null;
+  }
+}
+
+function getSafeSavedToken(): string | null {
+  try {
+    const saved = localStorage.getItem('bioscribe_token');
+    if (!saved || saved === 'undefined' || saved === 'null') {
+      return null;
+    }
+    return saved;
+  } catch {
+    localStorage.removeItem('bioscribe_token');
+    return null;
+  }
+}
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(getSafeSavedUser);
+  const [token, setToken] = useState<string | null>(getSafeSavedToken);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const initAuth = async () => {
-      const savedToken = localStorage.getItem('bioscribe_token');
-      if (savedToken) {
-        try {
+      try {
+        const savedToken = getSafeSavedToken();
+        if (savedToken) {
           const data = await apiRequest<{ user: User }>('/auth/me');
-          setUser(data.user);
-          localStorage.setItem('bioscribe_user', JSON.stringify(data.user));
-        } catch {
-          logout();
+          if (data && data.user && data.user.id) {
+            setUser(data.user);
+            localStorage.setItem('bioscribe_user', JSON.stringify(data.user));
+          } else {
+            logout();
+          }
         }
+      } catch {
+        logout();
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     const handleUnauthorized = () => {
@@ -59,33 +89,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         body: JSON.stringify({ email, password }),
       });
 
-      setToken(data.token);
-      setUser(data.user);
-      localStorage.setItem('bioscribe_token', data.token);
-      localStorage.setItem('bioscribe_user', JSON.stringify(data.user));
+      if (data && data.user) {
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem('bioscribe_token', data.token);
+        localStorage.setItem('bioscribe_user', JSON.stringify(data.user));
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const switchUser = async (_role: UserRole) => {
-    // Disabled in favor of explicit user login
     logout();
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('bioscribe_token');
-    localStorage.removeItem('bioscribe_user');
+    try {
+      localStorage.removeItem('bioscribe_token');
+      localStorage.removeItem('bioscribe_user');
+    } catch {
+      // ignore
+    }
   };
 
   const refreshUser = async () => {
     if (!token) return;
     try {
       const data = await apiRequest<{ user: User }>('/auth/me');
-      setUser(data.user);
-      localStorage.setItem('bioscribe_user', JSON.stringify(data.user));
+      if (data && data.user) {
+        setUser(data.user);
+        localStorage.setItem('bioscribe_user', JSON.stringify(data.user));
+      }
     } catch {
       logout();
     }

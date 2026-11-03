@@ -16,6 +16,7 @@ import { LoginPage } from './pages/LoginPage';
 import { SessionLockModal } from './components/security/SessionLockModal';
 import { GlobalSearchModal } from './components/search/GlobalSearchModal';
 import { ReagentBarcodeModal, ScannedReagent } from './components/reagents/ReagentBarcodeModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { apiRequest } from './api/client';
 
 const AppContent: React.FC = () => {
@@ -216,12 +217,14 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <NotificationProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </NotificationProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </NotificationProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
