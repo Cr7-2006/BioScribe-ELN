@@ -21,6 +21,37 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
+const DEMO_ACCOUNTS = [
+  {
+    id: 'kamalesh',
+    name: 'Dr. Kamalesh',
+    roleLabel: 'Researcher (Author)',
+    email: 'kamalesh@bioscribe.io',
+    avatar: '🔬',
+  },
+  {
+    id: 'thameem',
+    name: 'Dr. Thameem',
+    roleLabel: 'Reviewer (PI)',
+    email: 'thameem@bioscribe.io',
+    avatar: '📋',
+  },
+  {
+    id: 'subbu',
+    name: 'Dr. Subbu',
+    roleLabel: 'QA Compliance',
+    email: 'subbu@bioscribe.io',
+    avatar: '🛡️',
+  },
+  {
+    id: 'admin',
+    name: 'Administrator',
+    roleLabel: 'Informatics Admin',
+    email: 'admin@bioscribe.io',
+    avatar: '⚙️',
+  },
+];
+
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const { error, success, info } = useNotification();
@@ -53,6 +84,21 @@ export const LoginPage: React.FC = () => {
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
   const [regJustification, setRegJustification] = useState('');
   const [regSuccess, setRegSuccess] = useState(false);
+
+  const handleQuickLogin = async (acc: (typeof DEMO_ACCOUNTS)[0]) => {
+    setIdentifier(acc.email);
+    setPassword('Password123!');
+    setPendingVerificationError(null);
+    setIsSubmitting(true);
+    try {
+      await login(acc.email, 'Password123!');
+      success('Welcome Back', `Authenticated as ${acc.name} (${acc.roleLabel}).`);
+    } catch (err: any) {
+      error('Authentication Failed', err.message || 'Could not log in.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -370,6 +416,41 @@ export const LoginPage: React.FC = () => {
                       </>
                     )}
                   </button>
+                </div>
+
+                {/* 1-Click Demo Accounts Selector */}
+                <div className="pt-3.5 mt-2 border-t border-slate-200 dark:border-slate-800/80">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+                      ⚡ 1-Click Demo Accounts
+                    </span>
+                    <span className="text-[10px] text-brand-600 dark:text-brand-400 font-semibold">Click to login</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {DEMO_ACCOUNTS.map((acc) => (
+                      <button
+                        key={acc.id}
+                        type="button"
+                        onClick={() => handleQuickLogin(acc)}
+                        className="p-2 rounded-xl text-left bg-slate-50 hover:bg-brand-50/70 dark:bg-slate-900/60 dark:hover:bg-brand-950/40 border border-slate-200 dark:border-slate-800 hover:border-brand-400 dark:hover:border-brand-500/50 transition group cursor-pointer shadow-sm"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <span className="text-base flex-shrink-0">{acc.avatar}</span>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400 truncate">
+                              {acc.name}
+                            </p>
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                              {acc.roleLabel}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-slate-400 text-center mt-2.5">
+                    Demo password: <code className="font-mono text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Password123!</code>
+                  </p>
                 </div>
               </form>
             ) : (
